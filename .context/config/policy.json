@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "defaultEffect": "allow",
+  "rules": [
+    {
+      "id": "protect-repository-config",
+      "effect": "require_approval",
+      "when": {
+        "paths": [
+          ".github/workflows/**"
+        ],
+        "risk": "high"
+      },
+      "reason": "High-risk changes to repository automation and build configuration require approval."
+    },
+    {
+      "id": "block-secrets",
+      "effect": "deny",
+      "when": {
+        "paths": [
+          "**/.env*",
+          "**/*.pem",
+          "**/*.key",
+          "**/*secret*"
+        ]
+      },
+      "reason": "Secret-like files are blocked by policy."
+    }
+  ]
+}

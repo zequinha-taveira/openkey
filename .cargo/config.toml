@@ -1,0 +1,7 @@
+[build]
+# Default build flags
+rustflags = ["-C", "overflow-checks=on"]
+
+[alias]
+fmt-check = "fmt --check"
+clippy-all = "clippy --all-targets -- -D warnings"

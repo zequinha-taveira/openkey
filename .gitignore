@@ -1,0 +1,94 @@
+# Build artifacts & Cargo
+/target/
+/**/target/
+Cargo.lock.minor
+
+# Firmware Binaries & Flash Artefacts
+*.elf
+*.bin
+*.hex
+*.dfu
+*.map
+*.uf2
+
+# Fuzzing
+/fuzz/target/
+/fuzz/corpus/
+/fuzz/artifacts/
+
+# Python (Host SDK)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+
+# Node / GUI / Web
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Hardware (KiCad / CAD artifacts)
+*.bak
+*-bak
+*.kicad_pcb-bak
+*.sch-bak
+*.lck
+*_auto.kicad_pcb
+*.fp-lib-table.bak
+
+# Logs & Temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# IDE & Editor specific
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# dotcontext runtime state
+.context/plans/
+.context/cache/semantic/
+.context/runtime/
+.context/**/archive/
+

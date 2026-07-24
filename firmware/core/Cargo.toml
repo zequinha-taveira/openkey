@@ -1,0 +1,16 @@
+[package]
+name = "openkey-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Núcleo de segurança e protocolo CTAP2 do OpenKey (no_std)"
+
+[dependencies]
+openkey-pal = { workspace = true }
+
+[dev-dependencies]
+
+[features]
+default = []

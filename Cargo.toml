@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "firmware/core",
+    "firmware/pal",
+    "firmware/targets/rp2350",
+    "host/simulator",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["OpenKey Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/openkey/openkey"
+
+[workspace.dependencies]
+openkey-core = { path = "firmware/core" }
+openkey-pal = { path = "firmware/pal" }

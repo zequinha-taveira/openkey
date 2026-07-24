@@ -1,0 +1,14 @@
+[submodule "third_party/cmsis"]
+	path = third_party/cmsis
+	url = https://github.com/ARM-software/CMSIS_5.git
+	branch = master
+
+[submodule "third_party/fido-conformance"]
+	path = third_party/fido-conformance
+	url = https://github.com/fido-alliance/conformance-test-tools.git
+	branch = main
+
+[submodule "third_party/nrf-hal"]
+	path = third_party/nrf-hal
+	url = https://github.com/nrf-rs/nrf-hal.git
+	branch = master

@@ -1,0 +1,25 @@
+//! OpenKey Core Security Engine (`no_std`)
+//!
+//! Esta crate implementa a lógica agnóstica de protocolo e segurança do OpenKey.
+
+#![no_std]
+
+pub mod error;
+
+/// Versão do núcleo de protocolo OpenKey
+pub const OPENKEY_CORE_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Retorna o status de inicialização do núcleo
+pub fn core_info() -> &'static str {
+    "OpenKey Core v0.1.0 (no_std)"
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_core_info() {
+        assert_eq!(core_info(), "OpenKey Core v0.1.0 (no_std)");
+    }
+}

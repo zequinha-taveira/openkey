@@ -1,0 +1,13 @@
+[package]
+name = "openkey-pal"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Platform Abstraction Layer (PAL) Traits para o OpenKey (no_std)"
+
+[dependencies]
+
+[features]
+default = []
