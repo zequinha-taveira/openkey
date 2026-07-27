@@ -1,0 +1,14 @@
+[package]
+name = "openkey-protocols"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Protocolos CTAP2, CBOR, HID e WebAuthn do OpenKey (no_std)"
+
+[dependencies]
+openkey-core = { workspace = true }
+
+[features]
+default = []

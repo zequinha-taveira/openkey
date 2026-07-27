@@ -1,0 +1,39 @@
+# Board Profile Template
+# Copie este arquivo e adapte para sua placa.
+# Consulte docs/reference/board-profile-schema.md para o schema completo.
+
+board:
+  manufacturer: "YourManufacturer"
+  model: "YourBoardModel"
+  revision: "1.0"
+  mcu: "rp23xx"  # rp23xx | esp32s3 | stm32 | nrf54
+
+flash:
+  total_size_kb: 4096
+  page_size_bytes: 4096
+  sector_size_bytes: 4096
+
+usb:
+  vid: 0x0000
+  pid: 0x0000
+  bcd_version: "2.00"
+  max_packet_size: 64
+  product_string: "OpenKey Security Key"
+  manufacturer_string: "OpenKey"
+
+gpio:
+  led:
+    pin: 25
+    port: 0
+    active_high: true
+  button:
+    pin: 24
+    port: 0
+    active_low: true
+    pull_up: true
+
+features:
+  has_nfc: false
+  has_ble: false
+  has_secure_element: false
+  has_tamper_detect: false

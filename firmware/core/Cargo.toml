@@ -8,7 +8,7 @@ repository.workspace = true
 description = "Núcleo de segurança e protocolo CTAP2 do OpenKey (no_std)"
 
 [dependencies]
-openkey-pal = { workspace = true }
+openkey-platform = { workspace = true }
 
 [dev-dependencies]
 

@@ -21,8 +21,8 @@ O desenvolvimento do **OpenKey Framework** segue uma abordagem estritamente incr
 
 ### Fase 1: Infraestrutura do Framework e Monorepo
 - **Escopo**:
-  - Reorganização do monorepo, governança e pipeline de compilação em Rust (`Cargo.toml` workspace).
-  - Estruturação do `openkey-core` (`no_std`), `openkey-pal` (traits), `targets/simulator` e `targets/rp2350`.
+  - Estruturação do monorepo, governança e pipeline de compilação em Rust (`Cargo.toml` workspace).
+  - Estruturação do `openkey-core` (`no_std`), `openkey-platform` (traits), `boards/rp2350` e `host/simulator`.
   - Configuração do pipeline de Integração Contínua (GitHub Actions) com linters e checadores estáticos.
 - **Entrega**: O projeto compila com sucesso para os alvos `simulator` e `rp2350`.
 

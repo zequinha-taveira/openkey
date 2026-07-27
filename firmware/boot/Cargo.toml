@@ -1,0 +1,14 @@
+[package]
+name = "openkey-boot"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Bootloader e inicialização segura do OpenKey (no_std)"
+
+[dependencies]
+openkey-platform = { workspace = true }
+
+[features]
+default = []

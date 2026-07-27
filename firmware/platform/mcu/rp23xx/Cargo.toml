@@ -1,0 +1,15 @@
+[package]
+name = "openkey-target-rp2350"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Firmware Target de Referência para o Microcontrolador RP2350 (ARM Cortex-M33)"
+
+[dependencies]
+openkey-core = { workspace = true }
+openkey-platform = { workspace = true }
+
+[features]
+default = []

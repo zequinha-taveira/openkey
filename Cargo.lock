@@ -6,19 +6,40 @@ version = 4
 name = "openkey-core"
 version = "0.1.0"
 dependencies = [
- "openkey-pal",
+ "openkey-platform",
 ]
 
 [[package]]
-name = "openkey-pal"
+name = "openkey-crypto"
 version = "0.1.0"
+dependencies = [
+ "openkey-core",
+]
+
+[[package]]
+name = "openkey-platform"
+version = "0.1.0"
+
+[[package]]
+name = "openkey-protocols"
+version = "0.1.0"
+dependencies = [
+ "openkey-core",
+]
 
 [[package]]
 name = "openkey-simulator"
 version = "0.1.0"
 dependencies = [
  "openkey-core",
- "openkey-pal",
+ "openkey-platform",
+]
+
+[[package]]
+name = "openkey-storage"
+version = "0.1.0"
+dependencies = [
+ "openkey-core",
 ]
 
 [[package]]
@@ -26,5 +47,5 @@ name = "openkey-target-rp2350"
 version = "0.1.0"
 dependencies = [
  "openkey-core",
- "openkey-pal",
+ "openkey-platform",
 ]

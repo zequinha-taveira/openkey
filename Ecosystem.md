@@ -54,7 +54,7 @@ O objetivo principal é fornecer uma plataforma completa e unificada para fabric
 
 ## 🧩 Componentes do Ecossistema
 
-### 1. OpenKey Firmware (`firmware/core`)
+### 1. OpenKey Core (`core/`)
 Framework universal e agnóstico para autenticadores de hardware desenvolvido em Rust `no_std`.
 
 **Responsável por:**
@@ -170,17 +170,22 @@ O centro unificado de documentação oficial do projeto.
 
 ```text
 openkey/
-├── firmware/                  # Núcleo de segurança (core), transporte, PAL e targets
+├── core/                      # Núcleo de segurança (Security Core)
+├── platform/                  # HAL traits, Board/Device Profiles, Configuration Manager
+├── protocols/                 # Protocolos CTAP2, CBOR, HID, WebAuthn
+├── storage/                   # Gerenciamento de armazenamento persistente e wear-leveling
+├── crypto/                    # Abstrações criptográficas
+├── boards/                    # Implementações de board (RP2350, STM32, nRF, ESP32)
 ├── host/                      # Ecossistema host (sdk, cli, gui, simulator)
 │   ├── sdk/                   # OpenKey Python SDK & Bindings
 │   ├── cli/                   # Interface de Linha de Comando (openkey-cli)
 │   ├── gui/                   # Aplicação Desktop Graphic Manager
 │   └── simulator/             # Alvo do Simulador de Software
+├── tools/                     # Scripts de diagnóstico e ferramentas de desenvolvimento
 ├── docs/                      # Centro unificado de documentação técnica
 ├── examples/                  # Exemplos de uso do SDK e integrações
 ├── hardware/                  # Esquemáticos e layouts de PCB open hardware
 ├── fuzz/                      # Harnesses de fuzzing para cargo-fuzz
-├── tools/                     # Scripts de diagnóstico e ferramentas de desenvolvimento
 ├── scripts/                   # Scripts de automação de CI/CD e release
 └── .github/                   # Workflows de Integração Contínua (GitHub Actions)
 ```

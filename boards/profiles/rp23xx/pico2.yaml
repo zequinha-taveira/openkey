@@ -1,0 +1,35 @@
+board:
+  manufacturer: "Raspberry Pi"
+  model: "Pico 2"
+  revision: "1.0"
+  mcu: "rp23xx"
+
+flash:
+  total_size_kb: 4096
+  page_size_bytes: 4096
+  sector_size_bytes: 4096
+
+usb:
+  vid: 0x2E8A
+  pid: 0x000F
+  bcd_version: "2.00"
+  max_packet_size: 64
+  product_string: "OpenKey Pico 2"
+  manufacturer_string: "OpenKey / Raspberry Pi"
+
+gpio:
+  led:
+    pin: 25
+    port: 0
+    active_high: true
+  button:
+    pin: 24
+    port: 0
+    active_low: true
+    pull_up: true
+
+features:
+  has_nfc: false
+  has_ble: false
+  has_secure_element: false
+  has_tamper_detect: false

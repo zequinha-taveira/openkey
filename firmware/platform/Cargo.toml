@@ -1,0 +1,13 @@
+[package]
+name = "openkey-platform"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Platform Abstraction Layer, Board/Device Profiles e Configuration Manager do OpenKey (no_std)"
+
+[dependencies]
+
+[features]
+default = []

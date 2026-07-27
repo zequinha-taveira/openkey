@@ -1,0 +1,14 @@
+[package]
+name = "openkey-crypto"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Abstrações criptográficas do OpenKey (no_std)"
+
+[dependencies]
+openkey-core = { workspace = true }
+
+[features]
+default = []

@@ -21,7 +21,14 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - `docs/` — Living documentation produced by this tool.
 - `Ecosystem.md/`
 - `examples/`
-- `firmware/`
+- `core/`
+- `platform/`
+- `protocols/`
+- `storage/`
+- `crypto/`
+- `boards/`
+- `.context/`
+- `docs/`
 - `fuzz/`
 - `GOVERNANCE.md/`
 - `hardware/`
