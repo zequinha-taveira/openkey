@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%7C%20MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/Docs-Architecture%20%26%20Protocols-green.svg)](docs/README.md)
 
-OpenKey é uma chave de segurança de hardware de código aberto de alta segurança baseada nas especificações **FIDO2**, **CTAP2**, **WebAuthn**, **USB HID** e **CBOR**, desenvolvida em Rust para garantir segurança de memória e robustez criptográfica.
+OpenKey é um **framework open-source universal** para chaves de segurança FIDO2/WebAuthn, desenvolvido em Rust para garantir segurança de memória e robustez criptográfica. O OpenKey é um projeto de software — não possui nem exige uma placa própria (PCB). Utiliza placas de desenvolvimento existentes como plataformas de execução.
 
 ## 📐 Estrutura do Monorepo
 
@@ -47,9 +47,8 @@ openkey/
 │   ├── hardware/          # Testes que requerem hardware físico
 │   └── regression/        # Regressão para bugs conhecidos
 │
-├── docs/                  # Toda a documentação (tutoriais, how-to, reference, ADRs)
+├── docs/                  # Documentação Diátaxis (tutorials, how-to, reference, explanation)
 ├── examples/              # Exemplos de integração e uso do SDK
-├── hardware/              # Esquemas KiCad, PCB e modelos 3D
 ├── fuzz/                  # Harnesses de fuzzing (CBOR, CTAP2, HID)
 ├── third_party/           # Dependências de fornecedores e HALs
 ├── cmake/                 # Suporte a build CMake (para integração C/C++)
@@ -65,17 +64,27 @@ openkey/
 - 🚀 [Development Plan.md](Development%20Plan.md) — Plano de desenvolvimento incremental em 12 fases.
 - 📋 [spec.md](spec.md) — Especificação técnica funcional e não-funcional.
 
-## 📚 Filosofia de Documentação
+## 🔌 Hardware de Referência
 
-Nossa documentação em [`docs/`](docs/README.md) segue uma separação rigorosa de responsabilidades:
+O OpenKey **não vende hardware**. Utiliza placas comerciais existentes:
 
-- 🏗️ [`docs/architecture/`](docs/architecture/) — Explica a estrutura interna e como o sistema funciona.
-- 🛡️ [`docs/security/`](docs/security/) — Modelos de ameaças, políticas de memória segura e criptografia.
-- 🔌 [`docs/protocols/`](docs/protocols/) — Especificações de implementação do FIDO2, CTAP2, WebAuthn, HID e CBOR.
-- 🛠️ [`docs/development/`](docs/development/) — Guias de compilação, testes, depuração e publicação.
-- 📡 [`docs/api/`](docs/api/) — Especificação de APIs do Firmware, SDK, CLI e Configurator.
-- 📜 [`docs/adr/`](docs/adr/README.md) — Registros das decisões de arquitetura permanentes (ADRs).
-- 📖 [`docs/references/`](docs/references/) — Normas FIDO/W3C/NIST, glossário e bibliografia.
+| Família | Placas de Referência |
+|---------|---------------------|
+| **RP23xx** | Pico 2, Pico 2 W, XIAO RP2350, Tiny2350, Feather RP2350 |
+| **RP2040** | Pico, Pico W, Tiny2040, XIAO RP2040, Feather RP2040 |
+| **Futuro** | ESP32-S3, STM32, nRF52/nRF54 |
+
+Consulte [`docs/explanation/hardware-strategy.md`](docs/explanation/hardware-strategy.md) para a filosofia completa.
+
+## 📚 Documentação (Diátaxis)
+
+Nossa documentação em [`docs/`](docs/README.md) segue o modelo [Diátaxis](https://diataxis.fr/):
+
+- 🎓 [`docs/tutorials/`](docs/tutorials/) — Aprendizado guiado passo a passo.
+- 🔧 [`docs/how-to/`](docs/how-to/) — Tarefas práticas: build, flash, provisionar.
+- 📚 [`docs/reference/`](docs/reference/) — Referência técnica: arquitetura, protocolos, crypto, APIs, ADRs.
+- 📖 [`docs/explanation/`](docs/explanation/) — Conceitos: filosofia, threat model, decisões.
+- 📐 [`docs/diagrams/`](docs/diagrams/) — Diagramas de arquitetura (.drawio).
 
 ## 🚀 Começando
 
@@ -90,7 +99,7 @@ cd openkey
 cargo test --workspace
 ```
 
-Para mais detalhes sobre ambiente de desenvolvimento, consulte [`docs/development/testing.md`](docs/development/testing.md).
+Para mais detalhes, consulte [`docs/tutorials/getting-started.md`](docs/tutorials/getting-started.md).
 
 ## 🤝 Contribuição e Governança
 

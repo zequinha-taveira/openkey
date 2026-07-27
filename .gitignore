@@ -50,16 +50,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Hardware (KiCad / CAD artifacts — hardware/)
-*.bak
-*-bak
-*.kicad_pcb-bak
-*.sch-bak
-*.lck
-*_auto.kicad_pcb
-*.fp-lib-table.bak
-*.000
-*.kicad_prl
 
 # CMake (cmake/ e integração com SDKs de fabricantes)
 cmake/build/
