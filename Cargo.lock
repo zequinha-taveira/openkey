@@ -3,6 +3,20 @@
 version = 4
 
 [[package]]
+name = "openkey-boot"
+version = "0.1.0"
+dependencies = [
+ "openkey-platform",
+]
+
+[[package]]
+name = "openkey-config"
+version = "0.1.0"
+dependencies = [
+ "openkey-platform",
+]
+
+[[package]]
 name = "openkey-core"
 version = "0.1.0"
 dependencies = [
@@ -47,5 +61,12 @@ name = "openkey-target-rp2350"
 version = "0.1.0"
 dependencies = [
  "openkey-core",
+ "openkey-platform",
+]
+
+[[package]]
+name = "openkey-usb"
+version = "0.1.0"
+dependencies = [
  "openkey-platform",
 ]
