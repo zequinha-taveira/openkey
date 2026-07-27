@@ -3,6 +3,19 @@
 //! Toda placa é descrita por dados. Nunca codifique GPIOs diretamente
 //! no firmware quando puderem ser parametrizados.
 
+/// Identificador estável de um perfil de placa.
+///
+/// Este valor é persistido na configuração do dispositivo e resolvido por um
+/// catálogo compilado. O perfil completo nunca é desserializado da Flash.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BoardProfileId(pub [u8; 16]);
+
+/// Catálogo de perfis de placa disponíveis no firmware.
+pub trait BoardProfileCatalog {
+    /// Retorna o perfil associado ao identificador persistido.
+    fn find(&self, id: BoardProfileId) -> Option<&'static BoardProfile>;
+}
+
 /// Identificador de pino GPIO
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GpioPin {
@@ -54,6 +67,7 @@ pub struct OptionalFeatures {
 /// Board Profile - descreve uma placa de hardware por dados
 #[derive(Debug, Clone)]
 pub struct BoardProfile {
+    pub id: BoardProfileId,
     pub manufacturer: &'static str,
     pub model: &'static str,
     pub revision: &'static str,
@@ -68,6 +82,7 @@ impl BoardProfile {
     /// Cria um novo Board Profile
     #[allow(clippy::too_many_arguments)]
     pub const fn new(
+        id: BoardProfileId,
         manufacturer: &'static str,
         model: &'static str,
         revision: &'static str,
@@ -78,6 +93,7 @@ impl BoardProfile {
         features: OptionalFeatures,
     ) -> Self {
         Self {
+            id,
             manufacturer,
             model,
             revision,

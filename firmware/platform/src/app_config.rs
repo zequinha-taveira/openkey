@@ -3,7 +3,7 @@
 //! Toda configuração da aplicação deve ser independente do hardware.
 
 /// Configuração do protocolo CTAP2
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Ctap2Config {
     pub enable_fido2_0: bool,
     pub enable_fido2_1: bool,
@@ -18,7 +18,7 @@ pub struct Ctap2Config {
 }
 
 /// Configuração do protocolo CCID
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CcidConfig {
     pub enable_ccid: bool,
     pub max_message_length: u32,
@@ -26,7 +26,7 @@ pub struct CcidConfig {
 }
 
 /// Configuração do protocolo OpenPGP
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OpenPgpConfig {
     pub enable_openpgp: bool,
     pub max_key_size: u16,
@@ -35,7 +35,7 @@ pub struct OpenPgpConfig {
 }
 
 /// Configuração do protocolo PIV
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PivConfig {
     pub enable_piv: bool,
     pub max_key_size: u16,
@@ -44,7 +44,7 @@ pub struct PivConfig {
 }
 
 /// Configuração de logging
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LoggingConfig {
     pub enable_logging: bool,
     pub log_level: u8,
@@ -54,7 +54,7 @@ pub struct LoggingConfig {
 }
 
 /// Políticas de segurança
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SecurityPolicies {
     pub require_user_presence: bool,
     pub require_user_verification: bool,
@@ -67,7 +67,7 @@ pub struct SecurityPolicies {
 }
 
 /// Application Configuration - configuração independente de hardware
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AppConfig {
     pub ctap2: Ctap2Config,
     pub ccid: CcidConfig,

@@ -7,19 +7,17 @@ O OpenKey é um framework universal de código aberto para chaves de segurança 
 ## Arquitetura em Camadas
 
 ```text
-OpenKey Core
+Startup / firmware por MCU
         │
-Platform Services
+HAL por MCU
+        │
+Board Profile + Device Profile
         │
 Configuration Manager
         │
-Board Profile
+Platform Services
         │
-Device Profile
-        │
-HAL
-        │
-Startup
+OpenKey Core
 ```
 
 ## Componentes
@@ -41,3 +39,7 @@ Dados do dispositivo físico (número de série, identidade USB, calibração).
 
 ### Configuration Manager
 Gerencia configuração persistente durante o provisionamento.
+
+O Board Profile é resolvido por identificador a partir de um catálogo; os dados
+específicos da unidade e da aplicação são carregados de dois slots de Flash
+validados.

@@ -33,10 +33,16 @@ pub use app_config::{
     AppConfig, CcidConfig, Ctap2Config, LoggingConfig, OpenPgpConfig, PivConfig, SecurityPolicies,
 };
 pub use board::{
-    BoardProfile, ButtonConfig, FlashConfig, GpioPin, LedConfig, OptionalFeatures, UsbConfig,
+    BoardProfile, BoardProfileCatalog, BoardProfileId, ButtonConfig, FlashConfig, GpioPin,
+    LedConfig, OptionalFeatures, UsbConfig,
 };
-pub use config::{ConfigurationManager, ProvisioningState};
-pub use device::{CalibrationData, DeviceProfile, ManufacturingData, UsbIdentity};
+pub use config::{
+    ConfigStorageLayout, ConfigurationError, ConfigurationManager, ProvisioningState,
+};
+pub use device::{
+    CalibrationData, DeviceProfile, DeviceText, DeviceTextError, ManufacturingData, UsbIdentity,
+    DEVICE_TEXT_CAPACITY,
+};
 pub use hal::HalError;
 pub use services::{HardwareProviders, PlatformServices};
 

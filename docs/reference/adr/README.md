@@ -16,6 +16,7 @@ Este diretório contém todos os Registros de Decisão de Arquitetura (ADRs) do 
 | [ADR-0008](ADR-0008-flash-layout.md) | Layout de Memória Flash e Bootloader Dual-Bank com Assinatura Assimétrica | Aceito | 2026-07-24 |
 | [ADR-0009](ADR-0009-versioning.md) | Política de Versionamento Semântico e Release em Monorepo | Aceito | 2026-07-24 |
 | [ADR-0010](ADR-0010-monorepo-restructure.md) | Reestruturação do Layout do Monorepo OpenKey | Aceito | 2026-07-27 |
+| [ADR-0011](ADR-0011-device-configuration-persistence.md) | Persistência A/B de Configuração de Dispositivo | Aceito | 2026-07-27 |
 
 ---
 

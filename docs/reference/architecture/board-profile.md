@@ -4,6 +4,7 @@
 
 ```rust
 pub struct BoardProfile {
+    pub id: BoardProfileId,
     pub manufacturer: &'static str,
     pub model: &'static str,
     pub revision: &'static str,
@@ -45,4 +46,8 @@ pub struct BoardProfile {
 
 ## Uso
 
-O Board Profile é definido durante o provisionamento e armazenado na Flash.
+O Board Profile é uma descrição reutilizável, mantida como dado de fabricação
+(YAML) e disponibilizada ao firmware como catálogo compilado. A Flash armazena
+somente seu `BoardProfileId`; durante o boot, `BoardProfileCatalog` resolve o
+identificador para o perfil conhecido. O perfil completo não é desserializado
+da Flash.

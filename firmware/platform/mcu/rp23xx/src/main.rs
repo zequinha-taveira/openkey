@@ -20,21 +20,25 @@
 //! ```
 
 #![no_std]
-#![no_main]
+#![cfg_attr(not(test), no_main)]
 
+#[cfg(not(test))]
 use openkey_core::core_info;
 use openkey_platform::board::{
-    BoardProfile, ButtonConfig, FlashConfig, LedConfig, OptionalFeatures, UsbConfig,
+    BoardProfile, BoardProfileId, ButtonConfig, FlashConfig, LedConfig, OptionalFeatures, UsbConfig,
 };
-use openkey_platform::device::{DeviceProfile, UsbIdentity};
+use openkey_platform::device::{DeviceProfile, DeviceText, UsbIdentity};
+#[cfg(not(test))]
 use openkey_platform::hal::{
     FlashError, FlashStorageProvider, GpioDirection, GpioLevel, GpioProvider, HalError,
     RngProvider, TimerProvider, UsbTransportProvider, WatchdogProvider,
 };
+#[cfg(not(test))]
 use openkey_platform::{HardwareProviders, PlatformServices};
 
 /// Board Profile para a placa RP2350 de referência
 pub const BOARD_PROFILE: BoardProfile = BoardProfile {
+    id: BoardProfileId(*b"openkey-rp23xx01"),
     manufacturer: "OpenKey",
     model: "RP2350-REF",
     revision: "1.0",
@@ -68,21 +72,23 @@ pub const BOARD_PROFILE: BoardProfile = BoardProfile {
 
 /// Device Profile para a unidade RP2350 de referência
 pub const DEVICE_PROFILE: DeviceProfile = DeviceProfile {
-    serial_number: "RP2350-00000001",
+    serial_number: DeviceText::from_static("RP2350-00000001"),
     usb_identity: UsbIdentity {
         vid: 0x16C0,
         pid: 0x27DB,
-        serial_number: "RP2350-00000001",
-        product_name: "OpenKey Security Key",
-        manufacturer_name: "OpenKey",
+        serial_number: DeviceText::from_static("RP2350-00000001"),
+        product_name: DeviceText::from_static("OpenKey Security Key"),
+        manufacturer_name: DeviceText::from_static("OpenKey"),
     },
     calibration: None,
     manufacturing: None,
 };
 
 /// HAL de Flash para RP2350 (stub - implementação real usa XIP)
+#[cfg(not(test))]
 struct Rp2350Flash;
 
+#[cfg(not(test))]
 impl FlashStorageProvider for Rp2350Flash {
     fn read(&mut self, _offset: u32, _buf: &mut [u8]) -> Result<(), FlashError> {
         Err(FlashError::HardwareFailure)
@@ -102,8 +108,10 @@ impl FlashStorageProvider for Rp2350Flash {
 }
 
 /// HAL de RNG para RP2350 (stub - implementação real usa TRNG de hardware)
+#[cfg(not(test))]
 struct Rp2350Rng;
 
+#[cfg(not(test))]
 impl RngProvider for Rp2350Rng {
     fn fill_bytes(&mut self, _dest: &mut [u8]) -> Result<(), HalError> {
         Err(HalError::HardwareFailure)
@@ -115,8 +123,10 @@ impl RngProvider for Rp2350Rng {
 }
 
 /// HAL de USB para RP2350 (stub - implementação real usa TinyUSB)
+#[cfg(not(test))]
 struct Rp2350Usb;
 
+#[cfg(not(test))]
 impl UsbTransportProvider for Rp2350Usb {
     fn send_packet(&mut self, _packet: &[u8]) -> Result<(), HalError> {
         Err(HalError::HardwareFailure)
@@ -132,8 +142,10 @@ impl UsbTransportProvider for Rp2350Usb {
 }
 
 /// HAL de GPIO para RP2350 (stub)
+#[cfg(not(test))]
 struct Rp2350Gpio;
 
+#[cfg(not(test))]
 impl GpioProvider for Rp2350Gpio {
     fn set_direction(&mut self, _pin: u8, _direction: GpioDirection) -> Result<(), HalError> {
         Ok(())
@@ -153,8 +165,10 @@ impl GpioProvider for Rp2350Gpio {
 }
 
 /// HAL de Timer para RP2350 (stub)
+#[cfg(not(test))]
 struct Rp2350Timer;
 
+#[cfg(not(test))]
 impl TimerProvider for Rp2350Timer {
     fn millis(&self) -> u64 {
         0
@@ -174,8 +188,10 @@ impl TimerProvider for Rp2350Timer {
 }
 
 /// HAL de Watchdog para RP2350 (stub)
+#[cfg(not(test))]
 struct Rp2350Watchdog;
 
+#[cfg(not(test))]
 impl WatchdogProvider for Rp2350Watchdog {
     fn init(&mut self, _timeout_ms: u32) -> Result<(), HalError> {
         Ok(())
@@ -193,6 +209,7 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 }
 
 /// Ponto de entrada do firmware RP2350
+#[cfg(not(test))]
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     let mut flash = Rp2350Flash;

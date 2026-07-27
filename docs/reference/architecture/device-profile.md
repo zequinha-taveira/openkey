@@ -34,4 +34,7 @@ pub struct DeviceProfile {
 
 ## Uso
 
-O Device Profile identifica uma unidade física única.
+O Device Profile identifica uma unidade física única e é persistido junto à
+configuração. Para funcionar em firmware `no_std`, campos de texto usam
+`DeviceText`: UTF-8 validado, comprimento explícito e capacidade máxima de 64
+bytes. Dados que excedam esse limite são rejeitados no provisionamento.
