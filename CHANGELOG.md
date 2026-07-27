@@ -8,6 +8,9 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Adicionado
+- Autenticação e confidencialidade da configuração persistente com AES-256-GCM,
+  nonces do TRNG e chave fornecida por `ConfigKeyProvider`.
+- ADR-0012 sobre o limite entre Crypto e Platform para configuração autenticada.
 - Persistência A/B versionada para Device Profile e AppConfig, com validação de
   tamanho, UTF-8, versão e checksum antes do estado `Provisioned`.
 - `BoardProfileId`, `BoardProfileCatalog` e `ConfigStorageLayout` para separar

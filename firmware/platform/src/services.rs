@@ -5,7 +5,9 @@
 
 use crate::app_config::AppConfig;
 use crate::board::{BoardProfile, BoardProfileCatalog};
-use crate::config::{ConfigStorageLayout, ConfigurationError, ConfigurationManager};
+use crate::config::{
+    ConfigKeyProvider, ConfigStorageLayout, ConfigurationError, ConfigurationManager,
+};
 use crate::device::DeviceProfile;
 use crate::hal::{
     FlashStorageProvider, GpioProvider, RngProvider, TimerProvider, UsbTransportProvider,
@@ -40,10 +42,12 @@ impl<'a> PlatformServices<'a> {
     /// Carrega a configuração do flash
     pub fn load_config(
         &mut self,
+        key_provider: &dyn ConfigKeyProvider,
         catalog: &dyn BoardProfileCatalog,
         layout: ConfigStorageLayout,
     ) -> Result<(), ConfigurationError> {
-        self.config_mgr.load(self.hw.flash, catalog, layout)
+        self.config_mgr
+            .load(self.hw.flash, key_provider, catalog, layout)
     }
 
     /// Retorna referência ao Configuration Manager

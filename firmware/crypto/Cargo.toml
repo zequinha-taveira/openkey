@@ -8,7 +8,7 @@ repository.workspace = true
 description = "Abstrações criptográficas do OpenKey (no_std)"
 
 [dependencies]
-openkey-core = { workspace = true }
+aes-gcm = { version = "0.11.0", default-features = false, features = ["aes"] }
 
 [features]
 default = []

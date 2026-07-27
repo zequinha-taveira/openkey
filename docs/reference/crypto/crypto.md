@@ -2,21 +2,19 @@
 
 ## Arquitetura
 
-Abstrações criptográficas para o OpenKey.
+`firmware/crypto` fornece primitivas criptográficas independentes de Core e
+Platform. Isso preserva a direção de dependências: Core → Platform → Crypto.
 
-## Componentes
+## Configuração persistente
 
-- **ECC** - Curvas elípticas (P-256, Ed25519)
-- **SHA** - Hashes (SHA-256)
-- **AES** - Criptografia simétrica
-- **RNG** - Geração de números aleatórios
+AES-256-GCM do RustCrypto é usado in-place, sem heap, para confidencialidade e
+autenticidade da configuração. A Platform fornece a chave via
+`ConfigKeyProvider` e nonce via `RngProvider`; Crypto não mantém chaves nem
+acessa hardware. Chaves e buffers temporários são zeroizados pela Platform.
 
 ## Princípios
 
-- Execução em tempo constante
-- Zeroização de memória
-- Validação de parâmetros
-
-## Implementação
-
-Traits em `crypto/` com implementações específicas de hardware.
+- Sem chaves fixas no firmware.
+- Nonce de 96 bits novo por escrita e por chave.
+- Falha de autenticação ou RNG falha fechada.
+- Execução em tempo constante conforme as garantias do alvo e do RustCrypto.

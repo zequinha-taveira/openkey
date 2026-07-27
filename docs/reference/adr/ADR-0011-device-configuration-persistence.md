@@ -3,29 +3,17 @@
 - **Status**: Aceito
 - **Data**: 2026-07-27
 
-## Contexto
-
-O gerenciador anterior apenas verificava magic e versão na Flash, mas marcava o
-dispositivo como provisionado sem reconstruir Board Profile, Device Profile e
-AppConfig. Além disso, um offset fixo conflita com o layout de boot dual-bank.
-
 ## Decisão
 
-Board Profiles permanecem dados reutilizáveis e são resolvidos por
-`BoardProfileId` por um `BoardProfileCatalog` compilado. Os dados de unidade e
-aplicação são codificados explicitamente em um payload `no_std` de tamanho
-fixo. O armazenamento usa dois slots definidos por `ConfigStorageLayout`; o
-registro válido de maior geração é selecionado no boot.
-
-Um checksum detecta corrupção acidental nesta fase. Ele não é um mecanismo de
-autenticidade: a proteção criptográfica deverá ser fornecida pelo subsistema de
-storage/crypto definido no ADR-0002.
+Board Profiles são resolvidos por `BoardProfileId` em catálogo compilado. Device
+Profile e AppConfig usam dois slots em Flash definidos por `ConfigStorageLayout`.
+O registro v2 cifra o payload e autentica payload e cabeçalho imutável com
+AES-256-GCM. Registros v1 baseados apenas em checksum são rejeitados.
 
 ## Consequências
 
-- Perda de energia durante uma gravação não invalida o registro anterior.
-- Endereços de configuração deixam de ser globais e passam a pertencer ao
-  layout da plataforma.
-- Textos persistidos têm limite explícito de 64 bytes e são validados como UTF-8.
-- A API pública de `DeviceProfile` passa a usar `DeviceText`, compatível com
-  reconstrução segura em `no_std`.
+- Uma gravação interrompida preserva o slot válido anterior.
+- `ConfigKeyProvider` e TRNG saudável são obrigatórios; falhas não provisionam
+  o dispositivo.
+- Textos persistidos permanecem limitados e validados em `no_std`.
+- A migração de v1 requer reprovisionamento.

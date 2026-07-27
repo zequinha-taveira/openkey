@@ -8,6 +8,8 @@ repository.workspace = true
 description = "Platform Abstraction Layer, Board/Device Profiles e Configuration Manager do OpenKey (no_std)"
 
 [dependencies]
+openkey-crypto = { workspace = true }
+zeroize = { version = "1.8.2", default-features = false }
 
 [features]
 default = []

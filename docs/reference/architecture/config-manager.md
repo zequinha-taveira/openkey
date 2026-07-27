@@ -2,50 +2,28 @@
 
 ## Função
 
-Gerencia a configuração persistente durante o provisionamento. O registro é
-binário, versionado, determinístico e não usa alocação dinâmica.
+Gerencia Board Profile, Device Profile e Application Configuration persistentes.
+O formato é binário, versionado, determinístico e não usa alocação dinâmica.
 
-## Componentes
+## Persistência autenticada
 
-### Board Profile
-Descrição de dados da placa.
+A Flash contém dois slots definidos por `ConfigStorageLayout`. Cada registro v2
+contém magic, versão, estado, geração, tamanho do payload, nonce AES-GCM de 96
+bits e tag de 128 bits, seguido do payload cifrado.
 
-### Device Profile
-Dados do dispositivo físico.
+O payload é cifrado e autenticado com AES-256-GCM. Magic, versão, geração,
+tamanho e nonce formam AAD; o campo de estado fica fora da AAD para poder ser
+marcado como válido somente no término da escrita. Registros incompletos,
+corrompidos, com tag inválida, texto inválido ou versão diferente de v2 nunca
+deixam o dispositivo no estado `Provisioned`.
 
-### Application Configuration
-Configuração da aplicação (CTAP2, CCID, OpenPGP, PIV, Logging, Policies).
-
-## Persistência e recuperação
-
-A Flash contém dois slots exclusivos de configuração definidos pelo board/MCU
-através de `ConfigStorageLayout`. Cada slot contém `magic`, versão, estado,
-geração, tamanho do payload e checksum, seguido de `BoardProfileId`,
-`DeviceProfile` e `AppConfig`.
-
-O gravador apaga e prepara o slot inativo, escreve o payload e marca o slot
-como válido apenas ao final. Na inicialização, o gerenciador valida ambos os
-slots e escolhe o registro válido de maior geração. Um registro incompleto,
-com versão desconhecida, tamanho inválido, checksum incorreto ou dados UTF-8
-inválidos nunca deixa o dispositivo no estado `Provisioned`.
-
-O checksum atual detecta corrupção acidental; ele não autentica a configuração.
-A autenticação criptográfica será integrada ao subsistema definido no ADR-0002.
-
-## Fluxo
-
-```text
-Provisionador
-        │
-Configuration Manager
-        │
-Flash Storage
-```
+`ConfigKeyProvider` fornece a chave AES-256 apenas para a operação e o material
+efêmero é zeroizado. `RngProvider` saudável gera um nonce novo a cada gravação.
+Registros v1 com checksum não são aceitos: a migração exige reprovisionamento.
 
 ## Interfaces
 
-- `load(flash, catalog, layout)` - Carrega e valida a configuração do Flash
-- `save(flash, layout, board, device, app)` - Salva no slot inativo
-- `board_profile()` - Retorna Board Profile
-- `device_profile()` - Retorna Device Profile
-- `app_config()` - Retorna Application Configuration
+- `load(flash, key_provider, catalog, layout)` autentica e carrega a configuração.
+- `save(flash, crypto, layout, board, device, app)` cifra e grava no slot inativo;
+  `ConfigCryptoContext` agrupa o provider de chave e o RNG.
+- `board_profile()`, `device_profile()` e `app_config()` expõem somente dados autenticados.

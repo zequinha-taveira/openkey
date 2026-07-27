@@ -37,7 +37,8 @@ pub use board::{
     LedConfig, OptionalFeatures, UsbConfig,
 };
 pub use config::{
-    ConfigStorageLayout, ConfigurationError, ConfigurationManager, ProvisioningState,
+    ConfigCryptoContext, ConfigKeyError, ConfigKeyProvider, ConfigStorageLayout,
+    ConfigurationError, ConfigurationManager, ProvisioningState,
 };
 pub use device::{
     CalibrationData, DeviceProfile, DeviceText, DeviceTextError, ManufacturingData, UsbIdentity,

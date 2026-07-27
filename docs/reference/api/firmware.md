@@ -22,11 +22,19 @@ pub struct HardwareProviders<'a> {
 
 pub struct PlatformServices<'a> {
     pub fn new(hw: HardwareProviders<'a>) -> Self;
-    pub fn load_config(&mut self) -> Result<(), HalError>;
+    pub fn load_config(
+        &mut self,
+        key_provider: &dyn ConfigKeyProvider,
+        catalog: &dyn BoardProfileCatalog,
+        layout: ConfigStorageLayout,
+    ) -> Result<(), ConfigurationError>;
     pub fn feed_watchdog(&mut self);
     pub fn is_provisioned(&self) -> bool;
 }
 ```
+
+`ConfigKeyProvider` deve fornecer uma chave AES-256 exclusiva do dispositivo.
+Se estiver indisponível, o carregamento falha fechado.
 
 ## HAL Traits
 

@@ -8,15 +8,45 @@ use crate::device::{
     CalibrationData, DeviceProfile, DeviceText, DeviceTextError, ManufacturingData, UsbIdentity,
     DEVICE_TEXT_CAPACITY,
 };
-use crate::hal::{FlashError, FlashStorageProvider};
+use crate::hal::{FlashError, FlashStorageProvider, HalError, RngProvider};
+use openkey_crypto::{
+    decrypt_config, encrypt_config, CONFIG_AEAD_KEY_SIZE, CONFIG_AEAD_NONCE_SIZE,
+    CONFIG_AEAD_TAG_SIZE,
+};
+use zeroize::Zeroizing;
 
 const CONFIG_MAGIC: [u8; 4] = *b"OKCF";
-const CONFIG_VERSION: u8 = 1;
-const HEADER_SIZE: usize = 16;
+const CONFIG_VERSION: u8 = 2;
+const HEADER_SIZE: usize = 40;
+const AAD_SIZE: usize = 23;
 const MAX_PAYLOAD_SIZE: usize = 512;
 const MIN_SLOT_SIZE: u32 = (HEADER_SIZE + MAX_PAYLOAD_SIZE) as u32;
 const VALID_STATE: u8 = 0xA5;
 const WRITING_STATE: u8 = 0;
+
+/// Origem da chave AES-256 exclusiva do dispositivo.
+pub trait ConfigKeyProvider {
+    fn fill_key(&self, destination: &mut [u8; CONFIG_AEAD_KEY_SIZE]) -> Result<(), ConfigKeyError>;
+}
+
+/// Recursos criptográficos necessários durante uma gravação de configuração.
+pub struct ConfigCryptoContext<'a> {
+    key_provider: &'a dyn ConfigKeyProvider,
+    rng: &'a mut dyn RngProvider,
+}
+
+impl<'a> ConfigCryptoContext<'a> {
+    pub fn new(key_provider: &'a dyn ConfigKeyProvider, rng: &'a mut dyn RngProvider) -> Self {
+        Self { key_provider, rng }
+    }
+}
+
+/// Erro ao obter a chave de autenticação da configuração.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConfigKeyError {
+    Unavailable,
+    HardwareFailure,
+}
 
 /// Duas regiões de Flash reservadas exclusivamente para configuração.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,11 +60,19 @@ pub struct ConfigStorageLayout {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConfigurationError {
     Flash(FlashError),
+    Key(ConfigKeyError),
+    Rng(HalError),
     InvalidLayout,
     BufferTooSmall,
     InvalidRecord,
     UnknownBoardProfile,
     InvalidText,
+}
+
+impl From<ConfigKeyError> for ConfigurationError {
+    fn from(error: ConfigKeyError) -> Self {
+        Self::Key(error)
+    }
 }
 
 impl From<FlashError> for ConfigurationError {
@@ -75,14 +113,17 @@ impl ConfigurationManager {
     pub fn load(
         &mut self,
         flash: &mut dyn FlashStorageProvider,
+        key_provider: &dyn ConfigKeyProvider,
         catalog: &dyn BoardProfileCatalog,
         layout: ConfigStorageLayout,
     ) -> Result<(), ConfigurationError> {
         validate_layout(flash, layout)?;
         self.clear();
+        let mut key = Zeroizing::new([0u8; CONFIG_AEAD_KEY_SIZE]);
+        key_provider.fill_key(&mut key)?;
 
-        let primary = read_slot(flash, layout.primary_offset, catalog)?;
-        let secondary = read_slot(flash, layout.secondary_offset, catalog)?;
+        let primary = read_slot(flash, layout.primary_offset, &key, catalog)?;
+        let secondary = read_slot(flash, layout.secondary_offset, &key, catalog)?;
         let selected = match (primary, secondary) {
             (Some(left), Some(right)) => {
                 if left.generation >= right.generation {
@@ -107,12 +148,23 @@ impl ConfigurationManager {
     pub fn save(
         &mut self,
         flash: &mut dyn FlashStorageProvider,
+        crypto: &mut ConfigCryptoContext<'_>,
         layout: ConfigStorageLayout,
         board: &BoardProfile,
         device: &DeviceProfile,
         app: &AppConfig,
     ) -> Result<(), ConfigurationError> {
         validate_layout(flash, layout)?;
+        if !crypto.rng.is_healthy() {
+            return Err(ConfigurationError::Rng(HalError::RngNotHealthy));
+        }
+        let mut key = Zeroizing::new([0u8; CONFIG_AEAD_KEY_SIZE]);
+        crypto.key_provider.fill_key(&mut key)?;
+        let mut nonce = [0u8; CONFIG_AEAD_NONCE_SIZE];
+        crypto
+            .rng
+            .fill_bytes(&mut nonce)
+            .map_err(ConfigurationError::Rng)?;
         let generation = self
             .generation
             .checked_add(1)
@@ -124,14 +176,17 @@ impl ConfigurationManager {
         };
         let mut payload = [0u8; MAX_PAYLOAD_SIZE];
         let payload_len = encode_payload(&mut payload, board.id, device, app)?;
-        let checksum = checksum(&payload[..payload_len]);
         let mut header = [0u8; HEADER_SIZE];
         header[..4].copy_from_slice(&CONFIG_MAGIC);
         header[4] = CONFIG_VERSION;
         header[5] = WRITING_STATE;
         header[6..10].copy_from_slice(&generation.to_le_bytes());
         header[10..12].copy_from_slice(&(payload_len as u16).to_le_bytes());
-        header[12..16].copy_from_slice(&checksum.to_le_bytes());
+        header[12..24].copy_from_slice(&nonce);
+        let aad = associated_data(&header);
+        let tag = encrypt_config(&key, &nonce, &aad, &mut payload[..payload_len])
+            .map_err(|_| ConfigurationError::InvalidRecord)?;
+        header[24..40].copy_from_slice(&tag);
 
         flash.erase(target, layout.slot_size)?;
         flash.write(target, &header)?;
@@ -212,6 +267,7 @@ fn validate_layout(
 fn read_slot(
     flash: &mut dyn FlashStorageProvider,
     offset: u32,
+    key: &[u8; CONFIG_AEAD_KEY_SIZE],
     catalog: &dyn BoardProfileCatalog,
 ) -> Result<Option<LoadedRecord>, ConfigurationError> {
     let mut header = [0u8; HEADER_SIZE];
@@ -223,10 +279,14 @@ fn read_slot(
     if payload_len > MAX_PAYLOAD_SIZE {
         return Ok(None);
     }
-    let mut payload = [0u8; MAX_PAYLOAD_SIZE];
+    let mut payload = Zeroizing::new([0u8; MAX_PAYLOAD_SIZE]);
     flash.read(offset + HEADER_SIZE as u32, &mut payload[..payload_len])?;
-    let expected = u32::from_le_bytes([header[12], header[13], header[14], header[15]]);
-    if checksum(&payload[..payload_len]) != expected {
+    let mut nonce = [0u8; CONFIG_AEAD_NONCE_SIZE];
+    nonce.copy_from_slice(&header[12..24]);
+    let mut tag = [0u8; CONFIG_AEAD_TAG_SIZE];
+    tag.copy_from_slice(&header[24..40]);
+    let aad = associated_data(&header);
+    if decrypt_config(key, &nonce, &aad, &mut payload[..payload_len], &tag).is_err() {
         return Ok(None);
     }
     let generation = u32::from_le_bytes([header[6], header[7], header[8], header[9]]);
@@ -242,12 +302,11 @@ fn read_slot(
     }))
 }
 
-fn checksum(bytes: &[u8]) -> u32 {
-    let mut value = 0x811C_9DC5u32;
-    for byte in bytes {
-        value = (value ^ u32::from(*byte)).wrapping_mul(0x0100_0193);
-    }
-    value
+fn associated_data(header: &[u8; HEADER_SIZE]) -> [u8; AAD_SIZE] {
+    let mut aad = [0u8; AAD_SIZE];
+    aad[..5].copy_from_slice(&header[..5]);
+    aad[5..].copy_from_slice(&header[6..24]);
+    aad
 }
 
 struct Writer<'a> {
@@ -577,6 +636,51 @@ mod tests {
             }
         }
     }
+
+    struct TestKey;
+    impl ConfigKeyProvider for TestKey {
+        fn fill_key(
+            &self,
+            destination: &mut [u8; CONFIG_AEAD_KEY_SIZE],
+        ) -> Result<(), ConfigKeyError> {
+            destination.fill(0x42);
+            Ok(())
+        }
+    }
+
+    struct WrongKey;
+    impl ConfigKeyProvider for WrongKey {
+        fn fill_key(
+            &self,
+            destination: &mut [u8; CONFIG_AEAD_KEY_SIZE],
+        ) -> Result<(), ConfigKeyError> {
+            destination.fill(0x43);
+            Ok(())
+        }
+    }
+
+    struct TestRng {
+        next: u8,
+        healthy: bool,
+    }
+    impl TestRng {
+        fn healthy() -> Self {
+            Self {
+                next: 0,
+                healthy: true,
+            }
+        }
+    }
+    impl RngProvider for TestRng {
+        fn fill_bytes(&mut self, destination: &mut [u8]) -> Result<(), HalError> {
+            destination.fill(self.next);
+            self.next = self.next.wrapping_add(1);
+            Ok(())
+        }
+        fn is_healthy(&self) -> bool {
+            self.healthy
+        }
+    }
     #[derive(Clone, Copy)]
     enum Failure {
         None,
@@ -673,13 +777,23 @@ mod tests {
     fn round_trip_restores_all_configuration() {
         let mut flash = Flash::new();
         let mut writer = ConfigurationManager::new();
+        let mut rng = TestRng::healthy();
         let expected = device();
         let app = AppConfig::default();
         writer
-            .save(&mut flash, layout(), &BOARD, &expected, &app)
+            .save(
+                &mut flash,
+                &mut ConfigCryptoContext::new(&TestKey, &mut rng),
+                layout(),
+                &BOARD,
+                &expected,
+                &app,
+            )
             .unwrap();
         let mut reader = ConfigurationManager::new();
-        reader.load(&mut flash, &Catalog, layout()).unwrap();
+        reader
+            .load(&mut flash, &TestKey, &Catalog, layout())
+            .unwrap();
         assert_eq!(reader.device_profile(), Some(&expected));
         assert_eq!(reader.app_config(), Some(&app));
         assert_eq!(
@@ -691,9 +805,11 @@ mod tests {
     fn corrupted_new_slot_falls_back_to_previous_record() {
         let mut flash = Flash::new();
         let mut config = ConfigurationManager::new();
+        let mut rng = TestRng::healthy();
         config
             .save(
                 &mut flash,
+                &mut ConfigCryptoContext::new(&TestKey, &mut rng),
                 layout(),
                 &BOARD,
                 &device(),
@@ -703,19 +819,30 @@ mod tests {
         let mut updated = AppConfig::default();
         updated.logging.enable_logging = true;
         config
-            .save(&mut flash, layout(), &BOARD, &device(), &updated)
+            .save(
+                &mut flash,
+                &mut ConfigCryptoContext::new(&TestKey, &mut rng),
+                layout(),
+                &BOARD,
+                &device(),
+                &updated,
+            )
             .unwrap();
         flash.bytes[4096 + HEADER_SIZE] ^= 1;
         let mut reader = ConfigurationManager::new();
-        reader.load(&mut flash, &Catalog, layout()).unwrap();
+        reader
+            .load(&mut flash, &TestKey, &Catalog, layout())
+            .unwrap();
         assert!(!reader.app_config().unwrap().logging.enable_logging);
     }
     #[test]
     fn invalid_layout_is_rejected() {
         let mut flash = Flash::new();
+        let mut rng = TestRng::healthy();
         let error = ConfigurationManager::new()
             .save(
                 &mut flash,
+                &mut ConfigCryptoContext::new(&TestKey, &mut rng),
                 ConfigStorageLayout {
                     primary_offset: 0,
                     secondary_offset: 0,
@@ -735,9 +862,11 @@ mod tests {
             let mut flash = Flash::new();
             flash.failure = failure;
             let mut config = ConfigurationManager::new();
+            let mut rng = TestRng::healthy();
             assert!(config
                 .save(
                     &mut flash,
+                    &mut ConfigCryptoContext::new(&TestKey, &mut rng),
                     layout(),
                     &BOARD,
                     &device(),
@@ -749,7 +878,75 @@ mod tests {
         let mut flash = Flash::new();
         flash.failure = Failure::Read;
         let mut config = ConfigurationManager::new();
-        assert!(config.load(&mut flash, &Catalog, layout()).is_err());
+        assert!(config
+            .load(&mut flash, &TestKey, &Catalog, layout())
+            .is_err());
+        assert!(!config.is_provisioned());
+    }
+
+    #[test]
+    fn authentication_failures_do_not_provision_the_device() {
+        for offset in [HEADER_SIZE, 6, 24] {
+            let mut flash = Flash::new();
+            let mut writer = ConfigurationManager::new();
+            let mut rng = TestRng::healthy();
+            writer
+                .save(
+                    &mut flash,
+                    &mut ConfigCryptoContext::new(&TestKey, &mut rng),
+                    layout(),
+                    &BOARD,
+                    &device(),
+                    &AppConfig::default(),
+                )
+                .unwrap();
+            flash.bytes[offset] ^= 1;
+            let mut reader = ConfigurationManager::new();
+            assert!(reader
+                .load(&mut flash, &TestKey, &Catalog, layout())
+                .is_err());
+            assert!(!reader.is_provisioned());
+        }
+
+        let mut flash = Flash::new();
+        let mut writer = ConfigurationManager::new();
+        let mut rng = TestRng::healthy();
+        writer
+            .save(
+                &mut flash,
+                &mut ConfigCryptoContext::new(&TestKey, &mut rng),
+                layout(),
+                &BOARD,
+                &device(),
+                &AppConfig::default(),
+            )
+            .unwrap();
+        let mut reader = ConfigurationManager::new();
+        assert!(reader
+            .load(&mut flash, &WrongKey, &Catalog, layout())
+            .is_err());
+        assert!(!reader.is_provisioned());
+    }
+
+    #[test]
+    fn unhealthy_rng_prevents_persistence() {
+        let mut flash = Flash::new();
+        let mut rng = TestRng {
+            next: 0,
+            healthy: false,
+        };
+        let mut config = ConfigurationManager::new();
+        assert_eq!(
+            config.save(
+                &mut flash,
+                &mut ConfigCryptoContext::new(&TestKey, &mut rng),
+                layout(),
+                &BOARD,
+                &device(),
+                &AppConfig::default(),
+            ),
+            Err(ConfigurationError::Rng(HalError::RngNotHealthy))
+        );
         assert!(!config.is_provisioned());
     }
 }
