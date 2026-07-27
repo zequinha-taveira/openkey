@@ -1,0 +1,13 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="USB" id="usb-1">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" value="USB HID Stack &amp; CTAPHID Framing&#xa;(TODO: populate)" style="text;align=center;" vertex="1" parent="1">
+          <mxGeometry x="200" y="200" width="240" height="40" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

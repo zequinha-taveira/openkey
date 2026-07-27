@@ -2,37 +2,68 @@
 
 Bem-vindo ao centro de documentação oficial do monorepo **OpenKey**.
 
+A documentação segue o modelo [Diátaxis](https://diataxis.fr/):
+**Tutorials** → **How-to** → **Reference** → **Explanation**.
+
 ---
 
 ## 🧭 Mapa da Documentação
 
 ```text
 docs/
+│
 ├── README.md                 # Índice da documentação
-├── tutorials/                # Aprendizado (getting started, first builds)
-├── how-to/                   # Tarefas (build, flash, provision)
+│
+├── tutorials/                # Aprendizado
+│   ├── getting-started.md
+│   ├── first-build.md
+│   ├── first-provisioning.md
+│   ├── first-security-key.md
+│   └── add-new-board.md
+│
+├── how-to/                   # Tarefas
+│   ├── build-rp23xx.md
+│   ├── flash-firmware.md
+│   ├── provision-device.md
+│   ├── update-firmware.md
+│   ├── recover-device.md
+│   ├── create-board-profile.md
+│   ├── create-device-profile.md
+│   └── release.md
+│
 ├── reference/                # Referência técnica
-│   ├── architecture/         # Architecture, firmware, HAL, profiles
-│   ├── protocols/            # CTAP2, WebAuthn, HID, CBOR, COSE
-│   ├── crypto/               # Crypto, keys, attestation, RNG
-│   ├── host/                 # Python SDK, CLI, Configurator
-│   ├── boards/               # RP23xx, ESP32-S3, STM32, nRF
-│   └── api/                  # Firmware API, Host SDK API
-├── explanation/              # Conceitos (product, threat model, decisions)
-├── adr/                      # Architecture Decision Records
-├── architecture.md           # Visão geral da arquitetura
-├── firmware.md               # Arquitetura do firmware
-├── protocol.md               # Protocolos
-├── storage.md                # Armazenamento
-├── security-principles.md    # Princípios de segurança
-├── threat-model.md           # Modelo de ameaças
-├── testing.md                # Estratégia de testes
-└── build.md                  # Guia de build
+│   ├── architecture/
+│   ├── protocols/
+│   ├── crypto/
+│   ├── host/
+│   ├── boards/
+│   ├── api/
+│   └── adr/
+│
+├── explanation/              # Conceitos
+│   ├── product.md
+│   ├── development-plan.md
+│   ├── threat-model.md
+│   ├── security-principles.md
+│   ├── universal-firmware.md
+│   ├── provisioning.md
+│   ├── commissioning.md
+│   ├── architecture-decisions.md
+│   └── roadmap.md
+│
+└── diagrams/
+    ├── architecture.drawio
+    ├── provisioning.drawio
+    ├── storage.drawio
+    ├── usb.drawio
+    └── startup.drawio
 ```
 
 ---
 
 ## 🎓 Tutorials (Aprendizado)
+
+Ensinam alguém a aprender. Guiam passo a passo do zero até um resultado funcional.
 
 - [Getting Started](tutorials/getting-started.md)
 - [Primeiro Build](tutorials/first-build.md)
@@ -43,6 +74,8 @@ docs/
 ---
 
 ## 🔧 How-to (Tarefas)
+
+Mostram como executar uma tarefa específica. Pressupõem conhecimento básico.
 
 - [Build Firmware RP23xx](how-to/build-rp23xx.md)
 - [Flash Firmware](how-to/flash-firmware.md)
@@ -56,6 +89,8 @@ docs/
 ---
 
 ## 📚 Reference (Referência Técnica)
+
+Documentação técnica precisa. Descreve APIs, estruturas, protocolos e componentes.
 
 ### Arquitetura
 - [Architecture](reference/architecture/architecture.md)
@@ -76,7 +111,7 @@ docs/
 - [CBOR](reference/protocols/cbor.md)
 - [COSE](reference/protocols/cose.md)
 
-### Crypto
+### Criptografia
 - [Crypto](reference/crypto/crypto.md)
 - [Keys](reference/crypto/keys.md)
 - [Attestation](reference/crypto/attestation.md)
@@ -98,29 +133,33 @@ docs/
 - [Firmware API](reference/api/firmware.md)
 - [Host SDK API](reference/api/host-sdk.md)
 
+### ADR (Architecture Decision Records)
+- [Índice de ADRs](reference/adr/README.md)
+
 ---
 
 ## 📖 Explanation (Conceitos)
 
+Explica o "porquê" por trás das decisões. Discute contexto, filosofia e trade-offs.
+
 - [Product](explanation/product.md)
-- [Roadmap](explanation/roadmap.md)
+- [Development Plan](explanation/development-plan.md)
 - [Threat Model](explanation/threat-model.md)
 - [Security Principles](explanation/security-principles.md)
 - [Universal Firmware](explanation/universal-firmware.md)
 - [Provisioning](explanation/provisioning.md)
 - [Commissioning](explanation/commissioning.md)
 - [Architecture Decisions](explanation/architecture-decisions.md)
+- [Roadmap](explanation/roadmap.md)
 
 ---
 
-## 📜 ADRs (Architecture Decision Records)
+## 📐 Diagramas
 
-- [ADR-0001: Universal Firmware](adr/ADR-0001-rust.md)
-- [ADR-0002: HAL](adr/ADR-0002-storage.md)
-- [ADR-0003: Board Profile](adr/ADR-0003-usb.md)
-- [ADR-0004: Device Profile](adr/ADR-0004-unsafe.md)
-- [ADR-0005: Provisioning](adr/ADR-0005-sdk.md)
-- [ADR-0006: Storage](adr/ADR-0006-build.md)
-- [ADR-0007: Crypto](adr/ADR-0007-crypto.md)
-- [ADR-0008: Flash Layout](adr/ADR-0008-flash-layout.md)
-- [ADR-0009: Versioning](adr/ADR-0009-versioning.md)
+Diagramas de arquitetura e fluxos editáveis em formato `.drawio`:
+
+- [Architecture](diagrams/architecture.drawio)
+- [Provisioning](diagrams/provisioning.drawio)
+- [Storage](diagrams/storage.drawio)
+- [USB](diagrams/usb.drawio)
+- [Startup](diagrams/startup.drawio)
