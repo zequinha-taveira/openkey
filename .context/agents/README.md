@@ -3,6 +3,7 @@
 This directory contains ready-to-customize playbooks for AI agents collaborating on the repository.
 
 ## Available Agents
+- [Cacador de Bugs](./cacador-de-bugs.md) — Busca ativamente problemas e bugs nos códigos do projeto
 - [Code Reviewer](./code-reviewer.md) — Review code changes for quality, style, and best practices
 - [Bug Fixer](./bug-fixer.md) — Analyze bug reports and error messages
 - [Feature Developer](./feature-developer.md) — Implement new features according to specifications

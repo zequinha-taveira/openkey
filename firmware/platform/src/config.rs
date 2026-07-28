@@ -169,11 +169,10 @@ impl ConfigurationManager {
             .generation
             .checked_add(1)
             .ok_or(ConfigurationError::InvalidRecord)?;
-        let target = if self.generation == 0 || self.generation.is_multiple_of(2) {
-            layout.primary_offset
-        } else {
-            layout.secondary_offset
-        };
+        // Select the target slot by comparing actual flash contents, not by
+        // relying on the cached generation. The slot with the lower generation
+        // (or the primary slot when both are empty) is the inactive slot.
+        let target = self.select_inactive_slot(flash, &key, layout)?;
         let mut payload = [0u8; MAX_PAYLOAD_SIZE];
         let payload_len = encode_payload(&mut payload, board.id, device, app)?;
         let mut header = [0u8; HEADER_SIZE];
@@ -187,11 +186,18 @@ impl ConfigurationManager {
         let tag = encrypt_config(&key, &nonce, &aad, &mut payload[..payload_len])
             .map_err(|_| ConfigurationError::InvalidRecord)?;
         header[24..40].copy_from_slice(&tag);
+        // Write the VALID_STATE byte directly in the header buffer so the
+        // entire header (including the state byte) is written in a single
+        // flash.write() call. This avoids writing to the same offset twice,
+        // which is not supported by all flash hardware.
+        header[5] = VALID_STATE;
 
         flash.erase(target, layout.slot_size)?;
+        let header_end = target
+            .checked_add(HEADER_SIZE as u32)
+            .ok_or(ConfigurationError::InvalidLayout)?;
         flash.write(target, &header)?;
-        flash.write(target + HEADER_SIZE as u32, &payload[..payload_len])?;
-        flash.write(target + 5, &[VALID_STATE])?;
+        flash.write(header_end, &payload[..payload_len])?;
 
         self.board = Some(board.clone());
         self.device = Some(device.clone());
@@ -223,6 +229,46 @@ impl ConfigurationManager {
         self.app = None;
         self.generation = 0;
         self.state = ProvisioningState::Unprovisioned;
+    }
+
+    /// Reads the generation from a slot header without decrypting the payload.
+    /// Returns `None` if the slot is empty or invalid.
+    fn read_slot_generation(
+        flash: &mut dyn FlashStorageProvider,
+        offset: u32,
+    ) -> Result<Option<u32>, ConfigurationError> {
+        let mut header = [0u8; HEADER_SIZE];
+        flash.read(offset, &mut header)?;
+        if header[..4] != CONFIG_MAGIC || header[4] != CONFIG_VERSION || header[5] != VALID_STATE {
+            return Ok(None);
+        }
+        let generation = u32::from_le_bytes([header[6], header[7], header[8], header[9]]);
+        Ok(Some(generation))
+    }
+
+    /// Selects the inactive slot by comparing the actual generation values
+    /// stored in flash. The slot with the lower generation is considered
+    /// inactive. If both slots are empty, the primary slot is selected.
+    fn select_inactive_slot(
+        &self,
+        flash: &mut dyn FlashStorageProvider,
+        _key: &[u8; CONFIG_AEAD_KEY_SIZE],
+        layout: ConfigStorageLayout,
+    ) -> Result<u32, ConfigurationError> {
+        let primary_gen = Self::read_slot_generation(flash, layout.primary_offset)?;
+        let secondary_gen = Self::read_slot_generation(flash, layout.secondary_offset)?;
+        match (primary_gen, secondary_gen) {
+            (None, None) => Ok(layout.primary_offset),
+            (Some(_), None) => Ok(layout.secondary_offset),
+            (None, Some(_)) => Ok(layout.primary_offset),
+            (Some(p), Some(s)) => {
+                if p <= s {
+                    Ok(layout.secondary_offset)
+                } else {
+                    Ok(layout.primary_offset)
+                }
+            }
+        }
     }
 }
 
