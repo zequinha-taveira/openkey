@@ -194,6 +194,7 @@ name = "openkey-storage"
 version = "0.1.0"
 dependencies = [
  "openkey-core",
+ "openkey-crypto",
 ]
 
 [[package]]

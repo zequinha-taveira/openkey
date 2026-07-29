@@ -9,6 +9,7 @@ description = "Gerenciamento de armazenamento persistente e wear-leveling do Ope
 
 [dependencies]
 openkey-core = { workspace = true }
+openkey-crypto = { workspace = true }
 
 [features]
 default = []
