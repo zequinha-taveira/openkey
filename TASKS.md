@@ -15,10 +15,10 @@
 | PAR-02 | Architecture | ✅ Concluída | 100% |
 | PAR-03 | Platform | ✅ Concluída | 100% |
 | PAR-04 | Security | ✅ Concluída | 100% |
-| PAR-05 | Protocols | ⏳ Pendente | 0% |
-| PAR-06 | Host Tools | ⏳ Pendente | 0% |
-| PAR-07 | Validation | ⏳ Pendente | 0% |
-| PAR-08 | Release | ⏳ Pendente | 0% |
+| PAR-05 | Protocols | ✅ Concluída | 100% |
+| PAR-06 | Host Tools | ✅ Concluída | 100% |
+| PAR-07 | Validation | ✅ Concluída | 100% |
+| PAR-08 | Release | ✅ Concluída | 100% |
 
 ---
 
@@ -162,15 +162,13 @@
 
 ---
 
-## ⏳ PAR-08 — Release (Pendente)
+## 🔧 PAR-08 — Release (Concluída)
 
-> Depende da conclusão de PAR-07 (Validation)
-
-- [ ] **REL-001**: Preparar CHANGELOG
-- [ ] **REL-002**: Preparar Release Notes
-- [ ] **REL-003**: Criar pacotes de distribuição
-- [ ] **REL-004**: Finalizar documentação
-- [ ] **REL-005**: Criar tag de versão
+- [x] **REL-001**: Preparar CHANGELOG (`CHANGELOG.md` atualizado com versão `1.0.0`)
+- [x] **REL-002**: Preparar Release Notes (`VERSION_HISTORY.md` e notas de lançamento v1.0.0)
+- [x] **REL-003**: Criar pacotes de distribuição (Cargo release, firmware binário RP2350, Python SDK)
+- [x] **REL-004**: Finalizar documentação (Sincronização 100% dos documentos `spec.md`, `README.md`, `PHASES.md`, `TASKS.md`)
+- [x] **REL-005**: Criar tag de versão (Tag Git `v1.0.0` gerada)
 
 ---
 

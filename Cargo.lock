@@ -408,7 +408,7 @@ checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "openkey-boot"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "heapless",
  "openkey-crypto",
@@ -418,21 +418,21 @@ dependencies = [
 
 [[package]]
 name = "openkey-config"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-platform",
 ]
 
 [[package]]
 name = "openkey-core"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-platform",
 ]
 
 [[package]]
 name = "openkey-crypto"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "aes-gcm",
  "ecdsa",
@@ -447,7 +447,7 @@ dependencies = [
 
 [[package]]
 name = "openkey-platform"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-crypto",
  "zeroize",
@@ -455,7 +455,7 @@ dependencies = [
 
 [[package]]
 name = "openkey-protocols"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "heapless",
  "hex",
@@ -466,7 +466,7 @@ dependencies = [
 
 [[package]]
 name = "openkey-simulator"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-core",
  "openkey-platform",
@@ -474,7 +474,7 @@ dependencies = [
 
 [[package]]
 name = "openkey-storage"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-core",
  "openkey-crypto",
@@ -482,7 +482,7 @@ dependencies = [
 
 [[package]]
 name = "openkey-target-rp2350"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-core",
  "openkey-platform",
@@ -490,7 +490,7 @@ dependencies = [
 
 [[package]]
 name = "openkey-usb"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "openkey-platform",
 ]

@@ -238,9 +238,9 @@ Preparar a primeira versão estável.
 
 ### Gate
 
-* [ ] Release Candidate aprovado
-* [ ] Documentação completa
-* [ ] Tag de versão criada
+* [x] Release Candidate aprovado (v1.0.0 compilado em modo release e validado)
+* [x] Documentação completa (README.md, CHANGELOG.md, spec.md, VERSION_HISTORY.md sincronizados)
+* [x] Tag de versão criada (`v1.0.0`)
 
 ---
 

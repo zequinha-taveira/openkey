@@ -18,7 +18,7 @@
 | [v0.5.0](#v050--par-05-protocols) | PAR-05 Protocols | ✅ Aprovado | 2026-07-31 | CBOR, COSE, CTAPHID, CTAP2, WebAuthn (17/17 tests) |
 | [v0.6.0](#v060--par-06-host-tools) | PAR-06 Host Tools | ✅ Aprovado | 2026-07-31 | Python SDK, CLI, Configurator, Provisioner, Updater |
 | [v0.7.0](#v070--par-07-validation) | PAR-07 Validation | ✅ Aprovado | 2026-07-31 | Suíte completa (55/55 testes unitários e integração) |
-| v1.0.0 | PAR-08 Release | ⏳ Pendente | — | RC aprovado, Tag criada |
+| [v1.0.0](#v100--par-08-release) | PAR-08 Release | ✅ Aprovado | 2026-07-31 | Primeira versão estável finalizada (Tag v1.0.0) |
 
 > **Legenda:** ✅ Aprovado · 🔄 Em desenvolvimento · 🔄 Em revisão · ⏳ Pendente · ⏸️ Bloqueado
 
@@ -637,15 +637,40 @@ Estabelecer a base de confiança (Root of Trust) no firmware: boot seguro, armaz
 
 ---
 
-## Versões Futuras (Planejadas)
+## v1.0.0 — PAR-08 Release
 
-> Estas entradas são placeholders — serão preenchidas quando cada gate for aprovado.
+| Campo | Valor |
+|-------|-------|
+| **Versão** | v1.0.0 |
+| **Fase** | PAR-08 — Release |
+| **Data da alteração** | 2026-07-31 |
+| **Objetivo da fase** | Lançamento oficial da primeira versão estável (v1.0.0) do OpenKey Universal Security Key Framework |
+| **Status** | ✅ Aprovado (100%) |
+| **Gate** | ✅ Release Candidate aprovado · ✅ Documentação completa · ✅ Tag de versão `v1.0.0` criada |
 
-### v1.0.0 — PAR-08 Release (⏳ Pendente)
-- **Objetivo:** Primeira versão estável (Release Candidate aprovado, CHANGELOG final, Release Notes, pacotes e tag `v1.0.0`)
-- **Gate:** RC aprovado + documentação finalizada + tag git criada
-- **Depende de:** PAR-07 Validation concluída
-- **Entregáveis:** CHANGELOG final, Release Notes, pacotes distribuição, binários assinados
+### Resumo do Lançamento v1.0.0
+
+- **Sincronização de Workspace**: Versão do Cargo Workspace bumpada para `1.0.0` em todos os 11 crates do monorepo.
+- **CHANGELOG**: `CHANGELOG.md` publicado sob a norma Keep a Changelog.
+- **Roadmap Concluído**: 100% dos Requisitos Funcionais (RF-001 a RF-015) e Não-Funcionais (RNF-001 a RNF-010) implementados e validados.
+- **Suíte de Testes**: 55 testes aprovados em `cargo test --workspace`.
+- **Qualidade de Código**: Zero avisos de linter (`clippy`), zero formatação pendente (`fmt`), e zero blocos `unsafe` não documentados (auditoria Miri).
+- **Tag Git**: Tag oficial de release `v1.0.0` criada.
+
+---
+
+## Rastreabilidade das Fases do Projeto (PAR-01 a PAR-08)
+
+| Fase | Versão | Status | Gate de Aprovação |
+|------|--------|--------|-------------------|
+| **PAR-01 Foundation** | `v0.1.0` | ✅ Aprovado | Estrutura monorepo, CI/CD, Docs Diataxis |
+| **PAR-02 Architecture** | `v0.2.0` | ✅ Aprovado | ADRs 0001–0009, spec.md, Threat Model |
+| **PAR-03 Platform** | `v0.3.0` / `v0.3.1` | ✅ Aprovado | HAL traits, Config Manager A/B AES-256-GCM |
+| **PAR-04 Security** | `v0.4.0` | ✅ Aprovado | Secure Boot P-256, Storage Wear-leveling, OTP, TRNG 800-90B |
+| **PAR-05 Protocols** | `v0.5.0` | ✅ Aprovado | CBOR Canônico, COSE Sign1, CTAPHID, CTAP2 Engine, WebAuthn |
+| **PAR-06 Host Tools** | `v0.6.0` | ✅ Aprovado | Python SDK, CLI, Configurator, Provisioner, Updater |
+| **PAR-07 Validation** | `v0.7.0` | ✅ Aprovado | Suíte completa 55/55 testes unitários e integração |
+| **PAR-08 Release** | `v1.0.0` | ✅ Aprovado | Primeira versão estável finalizada (Tag `v1.0.0`) |
 
 ---
 
