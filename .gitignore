@@ -115,3 +115,7 @@ desktop.ini
 .context/cache/semantic/
 .context/runtime/
 .context/**/archive/
+
+# AI Agents & IDE metadata
+.gemini/
+.agents/

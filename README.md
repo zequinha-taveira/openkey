@@ -1,9 +1,10 @@
 # OpenKey 🔑
 
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%7C%20MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/Docs-Architecture%20%26%20Protocols-green.svg)](docs/README.md)
 
-OpenKey é um **framework open-source universal** para chaves de segurança FIDO2/WebAuthn, desenvolvido em Rust para garantir segurança de memória e robustez criptográfica. O OpenKey é um projeto de software — não possui nem exige uma placa própria (PCB). Utiliza placas de desenvolvimento existentes como plataformas de execução.
+OpenKey é um **framework open-source universal** para chaves de segurança FIDO2/WebAuthn, desenvolvido em Rust para garantir segurança de memória e robustez criptográfica. Atualmente na **versão 1.0.0 (estável)**. O OpenKey é um projeto de software — não possui nem exige uma placa própria (PCB). Utiliza placas de desenvolvimento existentes como plataformas de execução.
 
 ## 📐 Estrutura do Monorepo
 

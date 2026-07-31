@@ -1,6 +1,6 @@
 # Documentação do OpenKey 📖
 
-Bem-vindo ao centro de documentação oficial do monorepo **OpenKey**.
+Bem-vindo ao centro de documentação oficial do monorepo **OpenKey** (Versão Estável `v1.0.0`).
 
 A documentação segue o modelo [Diátaxis](https://diataxis.fr/):
 **Tutorials** → **How-to** → **Reference** → **Explanation**.
