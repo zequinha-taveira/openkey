@@ -11,9 +11,12 @@
 
 use ed25519_dalek::{
     Signature as Ed25519Signature, Signer, SigningKey as Ed25519SigningKey,
-    VerifyingKey as Ed25519VerifyingKey, Verifier as Ed25519Verifier,
+    Verifier as Ed25519Verifier, VerifyingKey as Ed25519VerifyingKey,
 };
-use p256::ecdsa::{Signature as P256Signature, SigningKey as P256SigningKey, VerifyingKey as P256VerifyingKey};
+use p256::ecdsa::signature::DigestVerifier;
+use p256::ecdsa::{
+    Signature as P256Signature, SigningKey as P256SigningKey, VerifyingKey as P256VerifyingKey,
+};
 use p256::elliptic_curve::rand_core::{CryptoRng, RngCore};
 use sha2::{Digest, Sha256};
 
@@ -68,10 +71,15 @@ pub trait AttestationKeyProvider {
     ///
     /// A chave nunca é exposta diretamente — apenas usada para assinar.
     /// Em implementações seguras, a assinatura ocorre dentro do HSM/OTP.
-    fn sign(&mut self, algorithm: AttestationAlgorithm, message: &[u8]) -> Result<AttestationSignature, KeyError>;
+    fn sign(
+        &mut self,
+        algorithm: AttestationAlgorithm,
+        message: &[u8],
+    ) -> Result<AttestationSignature, KeyError>;
 
     /// Retorna a chave pública de atestação
-    fn public_key(&self, algorithm: AttestationAlgorithm) -> Result<AttestationPublicKey, KeyError>;
+    fn public_key(&self, algorithm: AttestationAlgorithm)
+        -> Result<AttestationPublicKey, KeyError>;
 
     /// Verifica se a chave de atestação está disponível
     fn is_available(&self) -> bool;
@@ -125,11 +133,13 @@ impl EphemeralKeyPair {
         let private_bytes: &[u8] = private_key.as_ref();
 
         let mut public = heapless::Vec::new();
-        public.extend_from_slice(&point_bytes[1..])
+        public
+            .extend_from_slice(&point_bytes[1..])
             .map_err(|_| KeyError::InvalidKey)?;
 
         let mut private = heapless::Vec::new();
-        private.extend_from_slice(private_bytes)
+        private
+            .extend_from_slice(private_bytes)
             .map_err(|_| KeyError::InvalidKey)?;
 
         Ok(Self {
@@ -140,7 +150,7 @@ impl EphemeralKeyPair {
     }
 
     /// Gera um novo par de chaves efêmero usando Ed25519
-    pub fn generate_ed25519<R: RngCore>(rng: &mut R) -> Result<Self, KeyError> {
+    pub fn generate_ed25519<R: RngCore + CryptoRng>(rng: &mut R) -> Result<Self, KeyError> {
         let mut seed = [0u8; ED25519_PRIVATE_KEY_SIZE];
         rng.fill_bytes(&mut seed);
 
@@ -149,11 +159,13 @@ impl EphemeralKeyPair {
         let public_bytes = verifying_key.to_bytes();
 
         let mut public = heapless::Vec::new();
-        public.extend_from_slice(&public_bytes)
+        public
+            .extend_from_slice(&public_bytes)
             .map_err(|_| KeyError::InvalidKey)?;
 
         let mut private = heapless::Vec::new();
-        private.extend_from_slice(&seed)
+        private
+            .extend_from_slice(&seed)
             .map_err(|_| KeyError::InvalidKey)?;
 
         Ok(Self {
@@ -182,19 +194,22 @@ impl EphemeralKeyPair {
                 let signature: P256Signature = signing_key.sign(message);
                 let sig_bytes = signature.to_der();
                 let mut result = heapless::Vec::new();
-                result.extend_from_slice(sig_bytes.as_bytes())
+                result
+                    .extend_from_slice(sig_bytes.as_bytes())
                     .map_err(|_| KeyError::InvalidKey)?;
                 Ok(result)
             }
             AttestationAlgorithm::Ed25519 => {
-                let private_arr: [u8; ED25519_PRIVATE_KEY_SIZE] = self.private_key
+                let private_arr: [u8; ED25519_PRIVATE_KEY_SIZE] = self
+                    .private_key
                     .as_slice()
                     .try_into()
                     .map_err(|_| KeyError::InvalidKey)?;
                 let signing_key = Ed25519SigningKey::from_bytes(&private_arr);
                 let signature: Ed25519Signature = signing_key.sign(message);
                 let mut result = heapless::Vec::new();
-                result.extend_from_slice(&signature.to_bytes())
+                result
+                    .extend_from_slice(&signature.to_bytes())
                     .map_err(|_| KeyError::InvalidKey)?;
                 Ok(result)
             }
@@ -224,11 +239,17 @@ pub fn verify_p256_signature(
     let mut sec1_bytes = [0u8; 65];
     sec1_bytes[0] = 0x04;
     sec1_bytes[1..].copy_from_slice(public_key);
-    let verifying_key = P256VerifyingKey::from_sec1_bytes(&sec1_bytes)
-        .map_err(|_| KeyError::InvalidKey)?;
-    let sig = P256Signature::from_der(signature)
-        .map_err(|_| KeyError::InvalidSignature)?;
-    verifying_key.verify(message, &sig)
+    let verifying_key =
+        P256VerifyingKey::from_sec1_bytes(&sec1_bytes).map_err(|_| KeyError::InvalidKey)?;
+    let sig = P256Signature::from_der(signature).map_err(|_| KeyError::InvalidSignature)?;
+    // Usa verify_digest para evitar double-hashing: `message` já é um hash
+    // SHA-256, não deve ser hashado novamente pela função verify().
+    // Verifica a assinatura sobre o digest pré-computado em vez de deixar
+    // verify() hashear o hash novamente (double-hashing).
+    let mut hasher = Sha256::new();
+    hasher.update(message);
+    verifying_key
+        .verify_digest(hasher, &sig)
         .map_err(|_| KeyError::InvalidSignature)
 }
 
@@ -238,11 +259,10 @@ pub fn verify_ed25519_signature(
     message: &[u8],
     signature: &[u8],
 ) -> Result<(), KeyError> {
-    let pub_key_arr: &[u8; ED25519_PUBLIC_KEY_SIZE] = public_key
-        .try_into()
-        .map_err(|_| KeyError::InvalidKey)?;
-    let verifying_key = Ed25519VerifyingKey::from_bytes(pub_key_arr)
-        .map_err(|_| KeyError::InvalidKey)?;
+    let pub_key_arr: &[u8; ED25519_PUBLIC_KEY_SIZE] =
+        public_key.try_into().map_err(|_| KeyError::InvalidKey)?;
+    let verifying_key =
+        Ed25519VerifyingKey::from_bytes(pub_key_arr).map_err(|_| KeyError::InvalidKey)?;
     let sig_bytes: [u8; ED25519_SIGNATURE_SIZE] = signature
         .try_into()
         .map_err(|_| KeyError::InvalidSignature)?;
@@ -266,7 +286,7 @@ pub fn derive_aaguid(board_id: &[u8; 16]) -> [u8; AAGUID_SIZE] {
     aaguid
 }
 
-/// Deriva uma chave de atestação de um seed usando HKDF
+/// Deriva uma chave de atestação de um seed usando HKDF (RFC 5869)
 ///
 /// Esta função é usada apenas em ambiente de simulação/teste.
 /// Em produção, chaves de atestação são injetadas via OTP durante fabricação.
@@ -274,20 +294,16 @@ pub fn derive_attestation_key(
     seed: &[u8],
     info: &[u8],
 ) -> Result<heapless::Vec<u8, P256_PRIVATE_KEY_SIZE>, KeyError> {
-    // HKDF-Expand usando SHA-256
-    let mut hasher = Sha256::new();
-    hasher.update(seed);
-    hasher.update(info);
-    let prk = hasher.finalize();
+    use hkdf::Hkdf;
 
-    // Segunda rodada (expand)
-    let mut hasher2 = Sha256::new();
-    hasher2.update(prk);
-    hasher2.update([0x01]); // counter
-    let okm = hasher2.finalize();
+    // HKDF padrão (RFC 5869) usando HMAC-SHA256
+    let hk = Hkdf::<sha2::Sha256>::new(None, seed);
+    let mut okm = [0u8; P256_PRIVATE_KEY_SIZE];
+    hk.expand(info, &mut okm)
+        .map_err(|_| KeyError::InvalidKey)?;
 
     let mut key = heapless::Vec::new();
-    key.extend_from_slice(&okm[..P256_PRIVATE_KEY_SIZE])
+    key.extend_from_slice(&okm)
         .map_err(|_| KeyError::InvalidKey)?;
     Ok(key)
 }

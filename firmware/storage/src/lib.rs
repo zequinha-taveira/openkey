@@ -31,6 +31,10 @@ pub const PAGE_HEADER_SIZE: usize = 16;
 /// Tamanho útil de dados por página
 pub const PAGE_DATA_SIZE: usize = PAGE_SIZE - PAGE_HEADER_SIZE;
 
+/// Tamanho máximo de dados criptografados por página
+/// Garante espaço para header + nonce + tag
+pub const MAX_ENCRYPTED_DATA_SIZE: usize = PAGE_DATA_SIZE - NONCE_SIZE - TAG_SIZE;
+
 /// Tamanho do nonce AES-GCM
 pub const NONCE_SIZE: usize = 12;
 
@@ -214,11 +218,7 @@ where
     R: StorageRngProvider,
 {
     /// Cria um novo gerenciador de armazenamento
-    pub fn new(
-        flash: &'a mut F,
-        key_provider: &'a K,
-        rng: &'a mut R,
-    ) -> Self {
+    pub fn new(flash: &'a mut F, key_provider: &'a K, rng: &'a mut R) -> Self {
         Self {
             flash,
             key_provider,
@@ -268,21 +268,17 @@ where
     }
 
     /// Escreve dados criptografados em um slot
-    pub fn write_encrypted(
-        &mut self,
-        slot_index: usize,
-        data: &[u8],
-    ) -> Result<(), StorageError> {
-        let slot = self.slots[slot_index]
-            .ok_or(StorageError::PageNotFound)?;
+    pub fn write_encrypted(&mut self, slot_index: usize, data: &[u8]) -> Result<(), StorageError> {
+        let slot = self.slots[slot_index].ok_or(StorageError::PageNotFound)?;
 
-        if data.len() > PAGE_DATA_SIZE {
+        if data.len() > MAX_ENCRYPTED_DATA_SIZE {
             return Err(StorageError::BufferTooSmall);
         }
 
         // Obter chave
         let mut key = [0u8; KEY_SIZE];
-        self.key_provider.fill_key(&mut key)
+        self.key_provider
+            .fill_key(&mut key)
             .map_err(|_| StorageError::KeyUnavailable)?;
 
         // Gerar nonce
@@ -320,12 +316,8 @@ where
         let (aad, payload) = page_buf.split_at_mut(PAGE_HEADER_SIZE);
         let payload = &mut payload[..data.len()];
 
-        let tag = openkey_crypto::encrypt_config(
-            &key,
-            &nonce,
-            aad,
-            payload,
-        ).map_err(|_| StorageError::AuthenticationFailed)?;
+        let tag = openkey_crypto::encrypt_config(&key, &nonce, aad, payload)
+            .map_err(|_| StorageError::AuthenticationFailed)?;
 
         // Escrever nonce após o header (em área reservada)
         let nonce_offset = PAGE_HEADER_SIZE + data.len();
@@ -438,9 +430,8 @@ where
         // Extrair nonce
         let nonce_offset = PAGE_HEADER_SIZE + data_len;
         let mut nonce = [0u8; NONCE_SIZE];
-        if nonce_offset + NONCE_SIZE <= PAGE_SIZE {
-            nonce.copy_from_slice(&page_buf[nonce_offset..nonce_offset + NONCE_SIZE]);
-        }
+        // Com MAX_ENCRYPTED_DATA_SIZE, nonce sempre cabe
+        nonce.copy_from_slice(&page_buf[nonce_offset..nonce_offset + NONCE_SIZE]);
 
         // Extrair tag
         let tag_offset = nonce_offset + NONCE_SIZE;
@@ -472,8 +463,7 @@ where
         slot_index: usize,
         output: &mut [u8],
     ) -> Result<usize, StorageError> {
-        let slot = self.slots[slot_index]
-            .ok_or(StorageError::PageNotFound)?;
+        let slot = self.slots[slot_index].ok_or(StorageError::PageNotFound)?;
 
         // Encontrar página ativa mais recente
         let (page_idx, _header) = self.find_latest_active_page(&slot)?;
@@ -496,17 +486,15 @@ where
 
         // Obter chave
         let mut key = [0u8; KEY_SIZE];
-        self.key_provider.fill_key(&mut key)
+        self.key_provider
+            .fill_key(&mut key)
             .map_err(|_| StorageError::KeyUnavailable)?;
 
         // Extrair nonce
         let nonce_offset = PAGE_HEADER_SIZE + data_len;
         let mut nonce = [0u8; NONCE_SIZE];
-        if nonce_offset + NONCE_SIZE <= PAGE_SIZE {
-            nonce.copy_from_slice(&page_buf[nonce_offset..nonce_offset + NONCE_SIZE]);
-        } else {
-            // Nonce não armazenado, usar zeros (fallback)
-        }
+        // Com MAX_ENCRYPTED_DATA_SIZE, nonce sempre cabe
+        nonce.copy_from_slice(&page_buf[nonce_offset..nonce_offset + NONCE_SIZE]);
 
         // Extrair tag
         let tag_offset = nonce_offset + NONCE_SIZE;
@@ -583,7 +571,10 @@ where
     }
 
     /// Encontra a página ativa mais recente no slot
-    fn find_latest_active_page(&mut self, slot: &StorageSlot) -> Result<(usize, PageHeader), StorageError> {
+    fn find_latest_active_page(
+        &mut self,
+        slot: &StorageSlot,
+    ) -> Result<(usize, PageHeader), StorageError> {
         let mut latest_idx = 0;
         let mut latest_header = PageHeader::empty();
         let mut found = false;
@@ -617,8 +608,7 @@ where
 
     /// Marca todas as páginas de um slot como obsoletas (para wear-leveling)
     pub fn invalidate_slot(&mut self, slot_index: usize) -> Result<(), StorageError> {
-        let slot = self.slots[slot_index]
-            .ok_or(StorageError::PageNotFound)?;
+        let slot = self.slots[slot_index].ok_or(StorageError::PageNotFound)?;
 
         for i in 0..slot.page_count {
             let page_offset = slot.offset + (i as u32) * PAGE_SIZE as u32;
@@ -644,8 +634,7 @@ where
 
     /// Retorna o uso do slot (páginas ativas / total)
     pub fn slot_usage(&mut self, slot_index: usize) -> Result<(usize, usize), StorageError> {
-        let slot = self.slots[slot_index]
-            .ok_or(StorageError::PageNotFound)?;
+        let slot = self.slots[slot_index].ok_or(StorageError::PageNotFound)?;
 
         let mut active = 0;
         for i in 0..slot.page_count {
@@ -895,8 +884,12 @@ mod tests {
         let page_offset = 0u32;
         let corrupt_offset = PAGE_HEADER_SIZE as u32 + 5; // dentro do payload
         let mut byte_buf = [0u8; 1];
-        flash.read(page_offset + corrupt_offset, &mut byte_buf).unwrap();
-        flash.write(page_offset + corrupt_offset, &[byte_buf[0] ^ 0xFF]).unwrap();
+        flash
+            .read(page_offset + corrupt_offset, &mut byte_buf)
+            .unwrap();
+        flash
+            .write(page_offset + corrupt_offset, &[byte_buf[0] ^ 0xFF])
+            .unwrap();
 
         // Recuperação deve detectar a corrupção
         {
