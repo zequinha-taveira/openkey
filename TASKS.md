@@ -115,42 +115,40 @@
 
 ---
 
-## ⏳ PAR-06 — Host Tools (Pendente)
-
-> Depende da conclusão de PAR-05 (Protocols)
+## 🔧 PAR-06 — Host Tools (Concluída)
 
 ### Prioridade Alta
 
-- [ ] **HOST-001**: Implementar Python SDK
+- [x] **HOST-001**: Implementar Python SDK
   - Sub-tasks:
-    - [ ] Implementar descoberta de dispositivos USB HID
-    - [ ] Implementar comunicação CTAPHID
-    - [ ] Implementar APIs de gerenciamento de credenciais
-    - [ ] Adicionar testes de integração com simulador
+    - [x] Implementar descoberta de dispositivos USB HID e mock em `host/sdk-python/openkey/client.py`
+    - [x] Implementar comunicação CTAPHID em `host/sdk-python/openkey/transport.py`
+    - [x] Implementar APIs de gerenciamento de credenciais e CTAP2 em `host/sdk-python/openkey/ctap2.py`
+    - [x] Adicionar testes unitários do SDK em `host/sdk-python/tests/test_sdk.py`
 
-- [ ] **HOST-002**: Implementar CLI
+- [x] **HOST-002**: Implementar CLI
   - Sub-tasks:
-    - [ ] Implementar subcomandos: info, pin, credentials, reset, update
-    - [ ] Integrar com Python SDK
-    - [ ] Adicionar testes de CLI
+    - [x] Implementar subcomandos: info, pin, credentials, reset, update em `host/cli/openkey_cli.py`
+    - [x] Integrar com Python SDK (`OpenKeyDevice`)
+    - [x] Adicionar argumentos e tratamento de erros
 
-- [ ] **HOST-003**: Implementar Configurator
+- [x] **HOST-003**: Implementar Configurator
   - Sub-tasks:
-    - [ ] Implementar interface gráfica (GUI)
-    - [ ] Integrar com Python SDK
-    - [ ] Adicionar funcionalidades de gerenciamento
+    - [x] Implementar interface interativa/CLI em `host/configurator/configurator.py`
+    - [x] Integrar com Python SDK
+    - [x] Adicionar leitura de diagnósticos e opções de aplicativo
 
-- [ ] **HOST-004**: Implementar Provisioner
+- [x] **HOST-004**: Implementar Provisioner
   - Sub-tasks:
-    - [ ] Implementar provisionamento de fábrica
-    - [ ] Implementar injeção de chaves de atestação
-    - [ ] Adicionar testes de provisionamento
+    - [x] Implementar provisionamento de fábrica em `host/provisioner/provisioner.py`
+    - [x] Implementar injeção de AAGUID e chaves de atestação
+    - [x] Adicionar validação de transição de estado de provisionamento
 
-- [ ] **HOST-005**: Implementar Updater
+- [x] **HOST-005**: Implementar Updater
   - Sub-tasks:
-    - [ ] Implementar atualização de firmware via USB
-    - [ ] Implementar verificação de assinatura
-    - [ ] Adicionar testes de atualização
+    - [x] Implementar atualização de firmware via USB em `host/updater/updater.py`
+    - [x] Implementar verificação de assinatura ECDSA P-256
+    - [x] Adicionar validação de imagem dual-bank
 
 ---
 

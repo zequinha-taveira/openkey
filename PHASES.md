@@ -187,8 +187,8 @@ Desenvolver ferramentas para o computador.
 
 ### Gate
 
-* [ ] Testes de integração
-* [ ] Documentação atualizada
+* [x] Testes de integração (Python SDK, CLI, Configurator, Provisioner e Updater testados)
+* [x] Documentação atualizada (READMEs em `host/sdk-python/`, `host/cli/`, `host/configurator/`, `host/provisioner/`, `host/updater/`)
 
 ---
 

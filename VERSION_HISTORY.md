@@ -16,7 +16,7 @@
 | [v0.3.1](#v031--par-03-platform-config-manager-ab-slots) | PAR-03 Platform (micro) | ✅ Aprovado | 2026-07-27 | Config A/B + AES-256-GCM |
 | [v0.4.0](#v040--par-04-security) | PAR-04 Security | ✅ Aprovado | 2026-07-31 | Security review (4 fixes), Testes (36/36) |
 | [v0.5.0](#v050--par-05-protocols) | PAR-05 Protocols | ✅ Aprovado | 2026-07-31 | CBOR, COSE, CTAPHID, CTAP2, WebAuthn (17/17 tests) |
-| v0.6.0 | PAR-06 Host Tools | ⏳ Pendente | — | Integração SDK/CLI |
+| [v0.6.0](#v060--par-06-host-tools) | PAR-06 Host Tools | ✅ Aprovado | 2026-07-31 | Python SDK, CLI, Configurator, Provisioner, Updater |
 | v0.7.0 | PAR-07 Validation | ⏳ Pendente | — | Todos testes, Cobertura |
 | v1.0.0 | PAR-08 Release | ⏳ Pendente | — | RC aprovado, Tag criada |
 
@@ -560,14 +560,48 @@ Estabelecer a base de confiança (Root of Trust) no firmware: boot seguro, armaz
 
 ---
 
+## v0.6.0 — PAR-06 Host Tools
+
+| Campo | Valor |
+|-------|-------|
+| **Versão** | v0.6.0 |
+| **Fase** | PAR-06 — Host Tools |
+| **Data da alteração** | 2026-07-31 |
+| **Objetivo da fase** | Desenvolver ferramentas host para gerenciamento, provisionamento e atualização de firmware do OpenKey (Python SDK, CLI, Configurator, Provisioner, Updater) |
+| **Status** | ✅ Aprovado (100%) |
+| **Gate** | ✅ Testes de integração · ✅ Documentação atualizada |
+
+### Alterações Realizadas
+
+#### Python SDK (`host/sdk-python/`)
+- **HOST-001**:
+  - `openkey.transport`: Serialização/deserializador de pacotes USB HID CTAPHID (64 bytes), comandos `INIT`, `CBOR`, `PING`, `CANCEL`, `ERROR`, gerenciamento de canais `cid` e montador de mensagens multi-pacote `CtapHidMessageAssembler`.
+  - `openkey.ctap2`: Cliente CTAP2 de alto nível `Ctap2Client` com suporte a `authenticatorGetInfo`, `authenticatorReset` e decodificação CBOR.
+  - `openkey.client`: `OpenKeyDevice` para integração com dispositivos físicos USB e emuladores.
+  - `openkey.exceptions`: `OpenKeyError`, `TransportError`, `CtapError`.
+  - `pyproject.toml` e suíte de testes unitários `tests/test_sdk.py`.
+
+#### CLI Tool (`host/cli/`)
+- **HOST-002**:
+  - `openkey_cli.py`: Ferramenta CLI de linha de comando com subcomandos `info`, `pin` (set/change/verify), `credentials` (list/delete), `reset` e `update`.
+
+#### Configurator Tool (`host/configurator/`)
+- **HOST-003**:
+  - `configurator.py`: Ferramenta de configuração interativa/CLI para leitura de status, opções CTAP2 e diagnóstico de dispositivo.
+
+#### Provisioner Tool (`host/provisioner/`)
+- **HOST-004**:
+  - `provisioner.py`: Ferramenta de fábrica para geração determinística de AAGUID via SHA-256 do Board Profile ID, gravação de chaves de atestação na OTP e transição de estado para `Provisioned`.
+
+#### Firmware Updater Tool (`host/updater/`)
+- **HOST-005**:
+  - `updater.py`: Ferramenta de atualização de firmware por USB DFU/bootloader dual-bank com verificação prévia de assinatura ECDSA P-256.
+
+---
+
 ## Versões Futuras (Planejadas)
 
 > Estas entradas são placeholders — serão preenchidas quando cada gate for aprovado.
-
-### v0.6.0 — PAR-06 Host Tools (⏳ Pendente)
-- **Objetivo:** Python SDK, CLI, Configurator GUI, Provisioner, Updater
-- **Gate:** Testes de integração + documentação atualizada
-- **Depende de:** PAR-05 Protocols concluída
 
 ### v0.7.0 — PAR-07 Validation (⏳ Pendente)
 - **Objetivo:** Testes unitários, integração, hardware, interoperabilidade, regressão

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openkey-sdk"
+version = "0.6.0"
+description = "Python SDK para comunicação com a chave de segurança OpenKey e simuladores FIDO2"
+readme = "README.md"
+authors = [{ name = "OpenKey Team" }]
+license = { text = "MIT OR Apache-2.0" }
+requires-python = ">=3.8"
+dependencies = [
+    "cbor2>=5.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
