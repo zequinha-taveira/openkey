@@ -9,6 +9,10 @@ description = "Bootloader e inicialização segura do OpenKey (no_std)"
 
 [dependencies]
 openkey-platform = { workspace = true }
+openkey-crypto = { workspace = true }
+sha2 = { version = "0.10.0", default-features = false }
+heapless = { version = "0.8.0", default-features = false }
 
 [features]
 default = []
+std = ["openkey-crypto/std"]

@@ -27,6 +27,7 @@ pub mod board;
 pub mod config;
 pub mod device;
 pub mod hal;
+pub mod identity;
 pub mod services;
 
 pub use app_config::{
@@ -44,7 +45,10 @@ pub use device::{
     CalibrationData, DeviceProfile, DeviceText, DeviceTextError, ManufacturingData, UsbIdentity,
     DEVICE_TEXT_CAPACITY,
 };
-pub use hal::HalError;
+pub use hal::{HalError, HealthTestResult, RngHealthCheck};
+pub use identity::{
+    Aaguid, DeviceIdentity, DeviceProvisioningState, IdentityError,
+};
 pub use services::{HardwareProviders, PlatformServices};
 
 /// Versão da plataforma

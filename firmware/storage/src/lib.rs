@@ -54,6 +54,9 @@ pub enum PageState {
     Obsolete,
     /// Página corrompida (falha de integridade)
     Corrupted,
+    /// Página em processo de escrita (power-loss recovery)
+    /// Indica que a escrita foi interrompida antes de conclusão
+    Writing,
 }
 
 /// Erro de armazenamento
@@ -152,6 +155,7 @@ impl PageHeader {
                 1 => PageState::Active,
                 2 => PageState::Obsolete,
                 3 => PageState::Corrupted,
+                4 => PageState::Writing,
                 _ => PageState::Corrupted,
             },
             sequence: u32::from_le_bytes([buf[1], buf[2], buf[3], buf[4]]),
@@ -236,7 +240,7 @@ where
         if index >= self.slots.len() {
             return Err(StorageError::Unsupported);
         }
-        if offset % PAGE_SIZE as u32 != 0 {
+        if !offset.is_multiple_of(PAGE_SIZE as u32) {
             return Err(StorageError::Unsupported);
         }
         self.slots[index] = Some(StorageSlot {
@@ -294,7 +298,25 @@ where
         // Calcular CRC do dado original (plaintext) antes da criptografia
         let crc = Self::crc16(data);
 
+        // Construir cabeçalho com CRC do plaintext
+        self.sequence = self.sequence.wrapping_add(1);
+        let mut header = PageHeader {
+            state: PageState::Active,
+            sequence: self.sequence,
+            data_len: data.len() as u16,
+            crc,
+            data_type: slot.data_type,
+            flags: 0,
+        };
+
+        // Serializar header no início do buffer ANTES da criptografia
+        // para que o AAD (Additional Authenticated Data) seja consistente
+        // entre escrita e leitura.
+        let header_bytes = header.serialize();
+        page_buf[..PAGE_HEADER_SIZE].copy_from_slice(&header_bytes);
+
         // Criptografar dados in-place com AES-256-GCM
+        // O AAD é o header serializado (PAGE_HEADER_SIZE bytes no início do buffer)
         let (aad, payload) = page_buf.split_at_mut(PAGE_HEADER_SIZE);
         let payload = &mut payload[..data.len()];
 
@@ -304,21 +326,6 @@ where
             aad,
             payload,
         ).map_err(|_| StorageError::AuthenticationFailed)?;
-
-        // Construir cabeçalho com CRC do plaintext
-        self.sequence = self.sequence.wrapping_add(1);
-        let header = PageHeader {
-            state: PageState::Active,
-            sequence: self.sequence,
-            data_len: data.len() as u16,
-            crc,
-            data_type: slot.data_type,
-            flags: 0,
-        };
-
-        // Serializar header no início do buffer
-        let header_bytes = header.serialize();
-        page_buf[..PAGE_HEADER_SIZE].copy_from_slice(&header_bytes);
 
         // Escrever nonce após o header (em área reservada)
         let nonce_offset = PAGE_HEADER_SIZE + data.len();
@@ -339,10 +346,124 @@ where
         // Apagar página antes de escrever
         self.flash.erase(page_offset, PAGE_SIZE as u32)?;
 
-        // Escrever página
+        // Escrever header com estado Writing (power-loss recovery)
+        let mut write_header = header;
+        write_header.state = PageState::Writing;
+        let write_header_bytes = write_header.serialize();
+        self.flash.write(page_offset, &write_header_bytes)?;
+
+        // Escrever dados (header já serializado no page_buf)
         self.flash.write(page_offset, &page_buf)?;
 
+        // Atualizar estado para Active (commit final)
+        header.state = PageState::Active;
+        let final_header_bytes = header.serialize();
+        self.flash.write(page_offset, &final_header_bytes)?;
+
         Ok(())
+    }
+
+    /// Recupera de falha de energia durante escrita
+    ///
+    /// Varre todas as páginas dos slots configurados e:
+    /// - Marca páginas em estado `Writing` como `Corrupted`
+    /// - Marca páginas `Active` cuja assinatura falha como `Corrupted`
+    /// - Limpa páginas óbvias de escrita interrompida
+    pub fn recover_power_loss(&mut self) -> Result<(), StorageError> {
+        // Coleta informações dos slots antes de mutar
+        let slots: [(u32, usize, u8); 8] = core::array::from_fn(|i| {
+            self.slots[i]
+                .map(|s| (s.offset, s.page_count, s.data_type))
+                .unwrap_or((0, 0, 0))
+        });
+
+        for (offset, page_count, _data_type) in slots.iter() {
+            for i in 0..*page_count {
+                let page_offset = offset + (i as u32) * PAGE_SIZE as u32;
+                let mut header_buf = [0u8; PAGE_HEADER_SIZE];
+                if self.flash.read(page_offset, &mut header_buf).is_err() {
+                    continue;
+                }
+
+                let mut header = match PageHeader::deserialize(&header_buf) {
+                    Ok(h) => h,
+                    Err(_) => continue,
+                };
+
+                match header.state {
+                    PageState::Writing => {
+                        // Escrita interrompida — marcar como corrompida
+                        header.state = PageState::Corrupted;
+                        let header_bytes = header.serialize();
+                        let _ = self.flash.write(page_offset, &header_bytes);
+                    }
+                    PageState::Active => {
+                        // Verifica integridade da página ativa
+                        let is_valid = self.validate_page_integrity(page_offset, &header)?;
+                        if !is_valid {
+                            header.state = PageState::Corrupted;
+                            let header_bytes = header.serialize();
+                            let _ = self.flash.write(page_offset, &header_bytes);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Valida a integridade de uma página ativa (CRC + AEAD)
+    fn validate_page_integrity(
+        &mut self,
+        page_offset: u32,
+        header: &PageHeader,
+    ) -> Result<bool, StorageError> {
+        let data_len = header.data_len as usize;
+        if data_len > PAGE_DATA_SIZE {
+            return Ok(false);
+        }
+
+        let mut page_buf = [0u8; PAGE_SIZE];
+        if self.flash.read(page_offset, &mut page_buf).is_err() {
+            return Ok(false);
+        }
+
+        // Obter chave
+        let mut key = [0u8; KEY_SIZE];
+        if self.key_provider.fill_key(&mut key).is_err() {
+            return Ok(false);
+        }
+
+        // Extrair nonce
+        let nonce_offset = PAGE_HEADER_SIZE + data_len;
+        let mut nonce = [0u8; NONCE_SIZE];
+        if nonce_offset + NONCE_SIZE <= PAGE_SIZE {
+            nonce.copy_from_slice(&page_buf[nonce_offset..nonce_offset + NONCE_SIZE]);
+        }
+
+        // Extrair tag
+        let tag_offset = nonce_offset + NONCE_SIZE;
+        let mut tag = [0u8; TAG_SIZE];
+        if tag_offset + TAG_SIZE <= PAGE_SIZE {
+            tag.copy_from_slice(&page_buf[tag_offset..tag_offset + TAG_SIZE]);
+        }
+
+        // Tentar decriptar
+        let (aad, payload_and_rest) = page_buf.split_at_mut(PAGE_HEADER_SIZE);
+        let payload = &mut payload_and_rest[..data_len];
+
+        if openkey_crypto::decrypt_config(&key, &nonce, aad, payload, &tag).is_err() {
+            return Ok(false);
+        }
+
+        // Verificar CRC
+        let crc = Self::crc16(payload);
+        if crc != header.crc {
+            return Ok(false);
+        }
+
+        Ok(true)
     }
 
     /// Lê e decripta dados de um slot
@@ -444,7 +565,7 @@ where
                         latest_idx = i;
                     }
                 }
-                PageState::Obsolete | PageState::Corrupted => {
+                PageState::Writing | PageState::Obsolete | PageState::Corrupted => {
                     if empty_idx.is_none() {
                         empty_idx = Some(i);
                     }
@@ -703,5 +824,113 @@ mod tests {
         let (active, total) = storage.slot_usage(0).unwrap();
         assert_eq!(active, 1);
         assert_eq!(total, 4);
+    }
+
+    #[test]
+    fn test_power_loss_recovery_marks_writing_as_corrupted() {
+        let mut flash = MockFlash::new();
+        let key_provider = MockKeyProvider;
+        let mut rng = MockRng;
+
+        // Simula uma escrita interrompida: escreve um header com estado Writing
+        let mut header = PageHeader::new(0x01, 10, 1);
+        header.state = PageState::Writing;
+        let header_bytes = header.serialize();
+        flash.write(0, &header_bytes).unwrap();
+
+        // Recuperação deve marcar a página como corrompida
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            storage.recover_power_loss().unwrap();
+        }
+
+        // Verifica que a página foi marcada como Corrupted
+        let mut recovered_header_buf = [0u8; PAGE_HEADER_SIZE];
+        flash.read(0, &mut recovered_header_buf).unwrap();
+        let recovered_header = PageHeader::deserialize(&recovered_header_buf).unwrap();
+        assert_eq!(recovered_header.state, PageState::Corrupted);
+    }
+
+    #[test]
+    fn test_power_loss_recovery_preserves_valid_pages() {
+        let mut flash = MockFlash::new();
+        let key_provider = MockKeyProvider;
+        let mut rng = MockRng;
+
+        // Escreve dados válidos
+        let test_data = b"Valid data for power loss test";
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            storage.write_encrypted(0, test_data).unwrap();
+            // Recuperação não deve corromper a página válida
+            storage.recover_power_loss().unwrap();
+        }
+
+        // Lê os dados — deve ser recuperado corretamente
+        let mut output = [0u8; 64];
+        let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+        storage.configure_slot(0, 0, 4, 0x01).unwrap();
+        let read_len = storage.read_encrypted(0, &mut output).unwrap();
+        assert_eq!(read_len, test_data.len());
+        assert_eq!(&output[..read_len], test_data);
+    }
+
+    #[test]
+    fn test_integrity_validation_detects_corruption() {
+        let mut flash = MockFlash::new();
+        let key_provider = MockKeyProvider;
+        let mut rng = MockRng;
+
+        // Escreve dados válidos
+        let test_data = b"Integrity test data";
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            storage.write_encrypted(0, test_data).unwrap();
+        }
+
+        // Corrompe um byte de dados (fora do escopo do StorageManager)
+        let page_offset = 0u32;
+        let corrupt_offset = PAGE_HEADER_SIZE as u32 + 5; // dentro do payload
+        let mut byte_buf = [0u8; 1];
+        flash.read(page_offset + corrupt_offset, &mut byte_buf).unwrap();
+        flash.write(page_offset + corrupt_offset, &[byte_buf[0] ^ 0xFF]).unwrap();
+
+        // Recuperação deve detectar a corrupção
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            storage.recover_power_loss().unwrap();
+        }
+
+        // A página deve ser marcada como corrompida
+        let mut header_buf = [0u8; PAGE_HEADER_SIZE];
+        flash.read(page_offset, &mut header_buf).unwrap();
+        let header = PageHeader::deserialize(&header_buf).unwrap();
+        assert_eq!(header.state, PageState::Corrupted);
+
+        // Leitura deve falhar
+        let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+        storage.configure_slot(0, 0, 4, 0x01).unwrap();
+        let mut output = [0u8; 64];
+        assert!(storage.read_encrypted(0, &mut output).is_err());
+    }
+
+    #[test]
+    fn test_writing_state_in_serialization() {
+        let header = PageHeader {
+            state: PageState::Writing,
+            sequence: 42,
+            data_len: 128,
+            crc: 0xABCD,
+            data_type: 0x01,
+            flags: 0,
+        };
+        let bytes = header.serialize();
+        let deserialized = PageHeader::deserialize(&bytes).unwrap();
+        assert_eq!(header.state, deserialized.state);
+        assert_eq!(deserialized.state, PageState::Writing);
     }
 }

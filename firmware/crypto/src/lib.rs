@@ -4,8 +4,16 @@
 //!
 //! A autenticação da configuração persistente é encapsulada aqui para que a
 //! camada de plataforma não manipule detalhes de AES-GCM.
+//!
+//! ## Módulos
+//!
+//! - [`keys`] — Key Management: geração, verificação e zeroização de chaves
+//!   P-256 / Ed25519, AAGUID derivation
+//! - AEAD AES-256-GCM para configuração persistente
 
 #![no_std]
+
+pub mod keys;
 
 use aes_gcm::{
     aead::{AeadInOut, KeyInit},

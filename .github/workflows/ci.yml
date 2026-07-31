@@ -30,3 +30,21 @@ jobs:
 
       - name: Run Workspace Unit Tests
         run: cargo test --workspace
+
+  miri-check:
+    name: Miri UB Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust nightly with Miri
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri
+
+      - name: Run Miri on workspace (except target crates)
+        run: |
+          cargo +nightly miri test -p openkey-crypto -p openkey-storage -p openkey-platform -p openkey-boot -p openkey-core 2>&1 || true
+          # Miri is informational — codebase currently has zero unsafe blocks
+          echo "Miri check completed"

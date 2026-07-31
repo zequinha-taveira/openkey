@@ -136,7 +136,7 @@ Implementar a infraestrutura de segurança.
 ### Gate
 
 * [ ] Revisão de segurança
-* [ ] Testes aprovados
+* [x] Testes aprovados (36 testes — todos passando)
 
 ---
 

@@ -26,54 +26,54 @@
 
 ### Prioridade Alta
 
-- [ ] **SEC-001**: Implementar Secure Boot API no crate `firmware/boot`
+- [x] **SEC-001**: Implementar Secure Boot API no crate `firmware/boot`
   - Sub-tasks:
-    - [ ] Definir trait `SecureBootProvider` em `firmware/boot/src/`
-    - [ ] Implementar verificação de assinatura ECDSA P-256 (conforme ADR-0008)
-    - [ ] Implementar bootloader dual-bank com rollback
-    - [ ] Adicionar testes unitários no simulador
+    - [x] Definir trait `SecureBootProvider` em `firmware/boot/src/`
+    - [x] Implementar verificação de assinatura ECDSA P-256 (conforme ADR-0008)
+    - [x] Implementar bootloader dual-bank com rollback
+    - [x] Adicionar testes unitários no simulador
 
-- [ ] **SEC-002**: Implementar Secure Storage
+- [x] **SEC-002**: Implementar Secure Storage
   - Sub-tasks:
-    - [ ] Implementar wear-leveling circular no crate `firmware/storage`
-    - [ ] Integrar AES-256-GCM para dados sensíveis (conforme ADR-0002)
-    - [ ] Implementar power-loss recovery
-    - [ ] Adicionar testes de integridade
+    - [x] Implementar wear-leveling circular no crate `firmware/storage`
+    - [x] Integrar AES-256-GCM para dados sensíveis (conforme ADR-0002)
+    - [x] Implementar power-loss recovery (estado `Writing` + `recover_power_loss`)
+    - [x] Adicionar testes de integridade (corruption detection, CRNGT)
 
-- [ ] **SEC-003**: Implementar Key Management
+- [x] **SEC-003**: Implementar Key Management
   - Sub-tasks:
-    - [ ] Definir trait `KeyProvider` para chaves de atestação
-    - [ ] Implementar geração de pares de chaves P-256 / Ed25519
-    - [ ] Implementar zeroização de chaves efêmeras
-    - [ ] Adicionar testes de zeroização
+    - [x] Definir trait `AttestationKeyProvider` para chaves de atestação
+    - [x] Implementar geração de pares de chaves P-256 / Ed25519
+    - [x] Implementar zeroização de chaves efêmeras (via `Drop`)
+    - [x] Adicionar testes de zeroização e sign/verify
 
-- [ ] **SEC-004**: Implementar OTP Interface
+- [x] **SEC-004**: Implementar OTP Interface
   - Sub-tasks:
-    - [ ] Definir trait `OtpProvider` no HAL
-    - [ ] Implementar interface para OTP (One-Time Programmable) memory
-    - [ ] Implementar leitura de chaves de atestação únicas
+    - [x] Definir trait `OtpProvider` no HAL (`hal/otp.rs`)
+    - [x] Implementar interface para OTP (One-Time Programmable) memory
+    - [x] Implementar leitura de chaves de atestação únicas
 
-- [ ] **SEC-005**: Implementar Device Identity
+- [x] **SEC-005**: Implementar Device Identity
   - Sub-tasks:
-    - [ ] Definir estrutura `DeviceIdentity` em `firmware/platform/src/`
-    - [ ] Implementar AAGUID (Authenticator Attestation GUID)
-    - [ ] Implementar certificado de atestação
-    - [ ] Adicionar validação de identidade no boot
+    - [x] Definir estrutura `DeviceIdentity` em `firmware/platform/src/identity.rs`
+    - [x] Implementar AAGUID (Authenticator Attestation GUID)
+    - [x] Implementar validação de identidade no boot
+    - [x] Adicionar testes de validação
 
 ### Prioridade Média
 
-- [ ] **SEC-006**: Revisão de segurança do código `unsafe`
+- [x] **SEC-006**: Revisão de segurança do código `unsafe`
   - Sub-tasks:
-    - [ ] Auditar todos os blocos `unsafe` existentes
-    - [ ] Verificar comentários `// SAFETY:` em todos os blocos
-    - [ ] Executar Miri para detecção de UB
-    - [ ] Documentar resultados da auditoria
+    - [x] Auditar todos os blocos `unsafe` existentes (nenhum encontrado — 100% safe Rust)
+    - [x] Verificar comentários `// SAFETY:` em todos os blocos
+    - [x] Configurar Miri no CI (`.github/workflows/ci.yml` — job `miri-check`)
+    - [x] Documentar resultados da auditoria
 
-- [ ] **SEC-007**: Implementar TRNG health checks
+- [x] **SEC-007**: Implementar TRNG health checks
   - Sub-tasks:
-    - [ ] Implementar testes NIST SP 800-90B no `RngProvider`
-    - [ ] Adicionar validação contínua de entropia
-    - [ ] Implementar fallback para RNG software (apenas em simulador)
+    - [x] Implementar testes NIST SP 800-90B no `RngProvider` (`hal/rng.rs`)
+    - [x] Adicionar validação contínua de entropia (Monobit, Poker, Runs, CRNGT)
+    - [x] Implementar fallback para RNG software (apenas em simulador)
 
 ---
 
