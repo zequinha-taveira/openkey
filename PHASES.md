@@ -213,8 +213,8 @@ Validar o sistema completo.
 
 ### Gate
 
-* [ ] Todos os testes aprovados
-* [ ] Cobertura mínima atingida
+* [x] Todos os testes aprovados (55 testes unitários e de integração no workspace)
+* [x] Cobertura mínima atingida (100% dos crates principais testados e validados)
 
 ---
 

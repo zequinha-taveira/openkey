@@ -141,6 +141,42 @@ impl<'a> CtapHidPacket<'a> {
     }
 }
 
+/// Divide um payload de qualquer tamanho em pacotes CTAPHID de 64 bytes chamando o callback para cada pacote
+pub fn fragment_payload<F>(cid: u32, cmd: u8, payload: &[u8], mut callback: F)
+where
+    F: FnMut(&[u8; CTAPHID_PACKET_SIZE]),
+{
+    let mut pkt_buf = [0u8; CTAPHID_PACKET_SIZE];
+    let total_len = payload.len();
+
+    let init_data_len = total_len.min(CTAPHID_INIT_PAYLOAD_SIZE);
+    let init_pkt = CtapHidPacket::Init {
+        cid,
+        cmd,
+        payload_len: total_len as u16,
+        data: &payload[..init_data_len],
+    };
+    init_pkt.serialize(&mut pkt_buf);
+    callback(&pkt_buf);
+
+    let mut offset = init_data_len;
+    let mut seq = 0u8;
+
+    while offset < total_len {
+        let chunk_len = (total_len - offset).min(CTAPHID_CONT_PAYLOAD_SIZE);
+        let cont_pkt = CtapHidPacket::Cont {
+            cid,
+            seq,
+            data: &payload[offset..offset + chunk_len],
+        };
+        cont_pkt.serialize(&mut pkt_buf);
+        callback(&pkt_buf);
+
+        offset += chunk_len;
+        seq = (seq + 1) & 0x7f;
+    }
+}
+
 /// Montador e Fragmentador de mensagens CTAP HID
 #[derive(Debug, Default)]
 pub struct CtapHidMessageAssembler {

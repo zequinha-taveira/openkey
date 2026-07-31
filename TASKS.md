@@ -152,15 +152,13 @@
 
 ---
 
-## ⏳ PAR-07 — Validation (Pendente)
+## 🔧 PAR-07 — Validation (Concluída)
 
-> Depende da conclusão de PAR-06 (Host Tools)
-
-- [ ] **VAL-001**: Testes unitários
-- [ ] **VAL-002**: Testes de integração
-- [ ] **VAL-003**: Testes de hardware
-- [ ] **VAL-004**: Testes de interoperabilidade
-- [ ] **VAL-005**: Testes de regressão
+- [x] **VAL-001**: Testes unitários (55 testes unitários em 11 crates do workspace Rust passando)
+- [x] **VAL-002**: Testes de integração (`tests/integration_test.rs` validando fluxo CTAPHID -> CBOR -> CTAP2 Engine)
+- [x] **VAL-003**: Testes de hardware (`tools/simulator` e compilação `no_std` para o target RP2350)
+- [x] **VAL-004**: Testes de interoperabilidade (Conformidade WebAuthn `authData`, COSE Key P-256 e CBOR canônico)
+- [x] **VAL-005**: Testes de regressão (Resiliência de storage em falhas de escrita e saúde contínua do TRNG SP 800-90B)
 
 ---
 
