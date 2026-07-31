@@ -46,9 +46,7 @@ pub use device::{
     DEVICE_TEXT_CAPACITY,
 };
 pub use hal::{HalError, HealthTestResult, RngHealthCheck};
-pub use identity::{
-    Aaguid, DeviceIdentity, DeviceProvisioningState, IdentityError,
-};
+pub use identity::{Aaguid, DeviceIdentity, DeviceProvisioningState, IdentityError};
 pub use services::{HardwareProviders, PlatformServices};
 
 /// Versão da plataforma

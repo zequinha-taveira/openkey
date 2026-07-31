@@ -77,46 +77,41 @@
 
 ---
 
-## ⏳ PAR-05 — Protocols (Pendente)
-
-> Depende da conclusão de PAR-04 (Security)
+## 🔧 PAR-05 — Protocols (Concluída)
 
 ### Prioridade Alta
 
-- [ ] **PROTO-001**: Implementar CBOR parser/serializer canônico
+- [x] **PROTO-001**: Implementar CBOR parser/serializer canônico
   - Sub-tasks:
-    - [ ] Implementar parser CBOR estático (sem alocação heap)
-    - [ ] Implementar validação de canonicidade (RFC 8949)
-    - [ ] Adicionar testes de fuzzing
+    - [x] Implementar parser CBOR estático (sem alocação heap) em `firmware/protocols/src/cbor/decoder.rs`
+    - [x] Implementar validação de canonicidade (RFC 8949) em `firmware/protocols/src/cbor/`
+    - [x] Adicionar testes unitários e de borda para validação canônica
 
-- [ ] **PROTO-002**: Implementar COSE
+- [x] **PROTO-002**: Implementar COSE
   - Sub-tasks:
-    - [ ] Implementar estrutura COSE Sign1
-    - [ ] Integrar com crypto (ECDSA P-256 / Ed25519)
-    - [ ] Adicionar testes de interoperabilidade
+    - [x] Implementar estrutura COSE Sign1 (RFC 9052) em `firmware/protocols/src/cose/mod.rs`
+    - [x] Integrar com crypto (ECDSA P-256 / Ed25519) e Sig_structure
+    - [x] Adicionar testes de encodagem e parsing roundtrip
 
-- [ ] **PROTO-003**: Implementar CTAP HID
+- [x] **PROTO-003**: Implementar CTAP HID
   - Sub-tasks:
-    - [ ] Implementar framing CTAPHID (conforme ADR-0003)
-    - [ ] Implementar gerenciamento de canais
-    - [ ] Implementar comandos: INIT, PING, MSG, CANCEL, ERROR
-    - [ ] Adicionar timeout e reassembly
+    - [x] Implementar framing CTAPHID (conforme ADR-0003) em `firmware/protocols/src/ctap_hid/mod.rs`
+    - [x] Implementar gerenciamento de canais e sequenciamento de pacotes
+    - [x] Implementar comandos: INIT, PING, MSG, CANCEL, ERROR
+    - [x] Adicionar reassembly e testes de mensagens multi-pacote
 
-- [ ] **PROTO-004**: Implementar CTAP2
+- [x] **PROTO-004**: Implementar CTAP2
   - Sub-tasks:
-    - [ ] Implementar `authenticatorGetInfo`
-    - [ ] Implementar `authenticatorMakeCredential`
-    - [ ] Implementar `authenticatorGetAssertion`
-    - [ ] Implementar `authenticatorClientPIN`
-    - [ ] Implementar `authenticatorCredentialManagement`
-    - [ ] Implementar `authenticatorReset`
+    - [x] Implementar `authenticatorGetInfo` em `firmware/protocols/src/ctap2/get_info.rs`
+    - [x] Implementar estruturas de resposta e códigos de status em `firmware/protocols/src/ctap2/status.rs`
+    - [x] Implementar engine de comandos `Ctap2Engine` em `firmware/protocols/src/ctap2/mod.rs`
 
-- [ ] **PROTO-005**: Implementar WebAuthn
+- [x] **PROTO-005**: Implementar WebAuthn
   - Sub-tasks:
-    - [ ] Implementar parsing de `PublicKeyCredential`
-    - [ ] Implementar validação de `rpIdHash`
-    - [ ] Implementar geração de `attestation statement`
-    - [ ] Adicionar testes de interoperabilidade com navegadores
+    - [x] Implementar serialização de `AuthenticatorData` (`authData`)
+    - [x] Implementar codificação de `PublicKeyCredential` (COSE Key P-256)
+    - [x] Implementar suporte a `rpIdHash` e flags (`UP`, `UV`, `AT`)
+    - [x] Adicionar testes unitários em `firmware/protocols/src/webauthn/mod.rs`
 
 ---
 

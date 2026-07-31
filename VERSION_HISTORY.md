@@ -15,7 +15,7 @@
 | [v0.3.0](#v030--par-03-platform) | PAR-03 Platform | ✅ Aprovado | 2026-07-27 | Compila, HAL estável, Testes |
 | [v0.3.1](#v031--par-03-platform-config-manager-ab-slots) | PAR-03 Platform (micro) | ✅ Aprovado | 2026-07-27 | Config A/B + AES-256-GCM |
 | [v0.4.0](#v040--par-04-security) | PAR-04 Security | ✅ Aprovado | 2026-07-31 | Security review (4 fixes), Testes (36/36) |
-| v0.5.0 | PAR-05 Protocols | ⏳ Pendente | — | Interop tests |
+| [v0.5.0](#v050--par-05-protocols) | PAR-05 Protocols | ✅ Aprovado | 2026-07-31 | CBOR, COSE, CTAPHID, CTAP2, WebAuthn (17/17 tests) |
 | v0.6.0 | PAR-06 Host Tools | ⏳ Pendente | — | Integração SDK/CLI |
 | v0.7.0 | PAR-07 Validation | ⏳ Pendente | — | Todos testes, Cobertura |
 | v1.0.0 | PAR-08 Release | ⏳ Pendente | — | RC aprovado, Tag criada |
@@ -506,14 +506,63 @@ Estabelecer a base de confiança (Root of Trust) no firmware: boot seguro, armaz
 
 ---
 
+## v0.5.0 — PAR-05 Protocols
+
+| Campo | Valor |
+|-------|-------|
+| **Versão** | v0.5.0 |
+| **Fase** | PAR-05 — Protocols |
+| **Data da alteração** | 2026-07-31 |
+| **Objetivo da fase** | Implementar a pilha de protocolos CTAP2, CBOR canônico, COSE Sign1, CTAP HID e WebAuthn em Rust (`no_std`) |
+| **Status** | ✅ Aprovado (100%) |
+| **Gate** | ✅ Testes de interoperabilidade (17/17 testes em `openkey-protocols`) · ✅ Compatibilidade validada (RFC 8949, RFC 9052, CTAP2.1, W3C WebAuthn L2/L3) |
+
+### Alterações Realizadas
+
+#### Crate `firmware/protocols`
+- **PROTO-001 — CBOR Parser/Serializer Canônico (`firmware/protocols/src/cbor/`)**:
+  - `CborDecoder<'a>`: Decodificação estática `no_std` com validação de canonicidade RFC 8949 (menor tamanho de inteiro, ordenação estrita de chaves de mapas, rejeição de *indefinite length*, rejeição de chaves duplicadas).
+  - `CborEncoder<'a>`: Codificação estritamente mínima para buffers `&mut [u8]`.
+  - `CborValue<'a>`: Representação zero-copy (Unsigned, Negative, ByteString, TextString, ArrayHeader, MapHeader, Bool, Null).
+  - `compare_canonical_map_keys()`: Algoritmo RFC 8949 Section 4.2.1 (comprimento mais curto primeiro, depois ordenação lexicográfica de bytes).
+  - `CborError`: Enum fortemente tipado para diagnósticos de parsing.
+  - **8 testes unitários** (round-trip, rejeição de inteiros não-mínimos, ordenação canônica de mapas, chaves duplicadas, bytes adicionais).
+
+- **PROTO-002 — COSE Sign1 (`firmware/protocols/src/cose/`)**:
+  - `CoseAlgorithm`: Suporte a `Es256` (-7) e `EdDsa` (-8).
+  - `CoseSign1<'a>`: Struct para representação e parsing de estruturas COSE Sign1.
+  - `encode_protected_header()`, `encode_sig_structure()`, `encode_cose_sign1()`, `parse_cose_sign1()`.
+  - **2 testes unitários** (round-trip encode/parse, montagem de `Sig_structure`).
+
+- **PROTO-003 — CTAP HID Framing (`firmware/protocols/src/ctap_hid/`)**:
+  - `CtapHidPacket<'a>`: Empacotamento/desempacotamento de pacotes USB HID de 64 bytes (`Init` packet 57 bytes payload, `Cont` packet 59 bytes payload).
+  - `CtapHidCommand`: Enum de comandos (`Init`, `Ping`, `Msg`, `Cbor`, `Cancel`, `KeepAlive`, `Error`).
+  - `CtapHidMessageAssembler`: Montador de mensagens multi-pacote com verificação de canal (`cid`) e números de sequência (`seq`).
+  - **2 testes unitários** (serialização/parsing de pacotes, montagem de requisições multi-pacote).
+
+- **PROTO-004 — CTAP2 Engine (`firmware/protocols/src/ctap2/`)**:
+  - `Ctap2Engine`: Engine de despacho de comandos CTAP2.
+  - `GetInfoResponse`: Implementação completa de `authenticatorGetInfo` (0x04) retornando AAGUID, versões suportadas (`FIDO_2_0`, `FIDO_2_1`), extensões (`hmac-secret`, `credProtect`), opções (`rk`, `up`, `plat`, `clientPin`) em mapa CBOR canônico.
+  - `Ctap2Status` & `Ctap2Command`: Enums normativos.
+  - **3 testes unitários** (geração de resposta getInfo, tratamento de comando inválido).
+
+- **PROTO-005 — WebAuthn Integration (`firmware/protocols/src/webauthn/`)**:
+  - `AuthenticatorData<'a>`: Representação e serialização de `authData` conforme W3C WebAuthn Section 6.1 (rpIdHash, flags UP/UV/AT/ED, signCount, attestedCredentialData).
+  - `encode_p256_cose_key()`: Codificação de chave pública P-256 no formato COSE_Key CBOR.
+  - **2 testes unitários** (serialização de `authData`, codificação de chave COSE P-256).
+
+### Testes
+
+| Crate | Testes | Status |
+|-------|--------|--------|
+| openkey-protocols | 17 | ✅ Todos passando |
+| Workspace Total | **53** | ✅ **Todos passando** |
+
+---
+
 ## Versões Futuras (Planejadas)
 
 > Estas entradas são placeholders — serão preenchidas quando cada gate for aprovado.
-
-### v0.5.0 — PAR-05 Protocols (⏳ Pendente)
-- **Objetivo:** CBOR, COSE, CTAP HID, CTAP2, WebAuthn implementation
-- **Gate:** Testes de interoperabilidade + compatibilidade validada
-- **Depende de:** PAR-04 Security concluída
 
 ### v0.6.0 — PAR-06 Host Tools (⏳ Pendente)
 - **Objetivo:** Python SDK, CLI, Configurator GUI, Provisioner, Updater

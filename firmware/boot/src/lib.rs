@@ -31,9 +31,7 @@
 
 #![no_std]
 
-use openkey_crypto::keys::{
-    verify_p256_signature, P256_PUBLIC_KEY_SIZE, P256_SIGNATURE_SIZE,
-};
+use openkey_crypto::keys::{verify_p256_signature, P256_PUBLIC_KEY_SIZE, P256_SIGNATURE_SIZE};
 use openkey_platform::hal::{FlashError, FlashStorageProvider, HalError, OtpProvider, RngProvider};
 use sha2::{Digest, Sha256};
 
@@ -253,7 +251,9 @@ impl<'a> SecureBootManager<'a> {
         }
 
         // Verifica assinatura
-        self.verify_image(flash, offset, size).map(|_| true).or(Ok(false))
+        self.verify_image(flash, offset, size)
+            .map(|_| true)
+            .or(Ok(false))
     }
 
     /// Calcula o hash SHA-256 de uma região do flash
@@ -313,7 +313,8 @@ impl<'a> SecureBootProvider for SecureBootManager<'a> {
 
         // Lê a assinatura
         let mut signature = [0u8; P256_SIGNATURE_SIZE];
-        signature.copy_from_slice(&header[SIGNATURE_OFFSET..SIGNATURE_OFFSET + P256_SIGNATURE_SIZE]);
+        signature
+            .copy_from_slice(&header[SIGNATURE_OFFSET..SIGNATURE_OFFSET + P256_SIGNATURE_SIZE]);
 
         // Calcula o hash da imagem (excluindo o header de assinatura)
         let image_data_offset = offset + SIGNATURE_HEADER_SIZE as u32;
@@ -363,10 +364,7 @@ impl<'a> SecureBootProvider for SecureBootManager<'a> {
 }
 
 /// Executa o Self-Test (POST) no boot
-pub fn run_self_test(
-    rng: &mut dyn RngProvider,
-    otp: &dyn OtpProvider,
-) -> Result<(), BootError> {
+pub fn run_self_test(rng: &mut dyn RngProvider, otp: &dyn OtpProvider) -> Result<(), BootError> {
     // Verifica saúde do RNG
     if !rng.is_healthy() {
         return Err(BootError::RngNotHealthy);

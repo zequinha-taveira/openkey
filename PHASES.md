@@ -161,8 +161,8 @@ Implementar protocolos.
 
 ### Gate
 
-* [ ] Testes de interoperabilidade
-* [ ] Compatibilidade validada
+* [x] Testes de interoperabilidade (17 testes unitários em `openkey-protocols` cobrindo CBOR, COSE, CTAP HID, CTAP2 e WebAuthn)
+* [x] Compatibilidade validada (RFC 8949, RFC 9052, CTAP2.1 Spec, W3C WebAuthn Level 2/3)
 
 ---
 

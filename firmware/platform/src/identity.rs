@@ -207,14 +207,16 @@ mod tests {
             &mut self,
             _algorithm: AttestationAlgorithm,
             _message: &[u8],
-        ) -> Result<openkey_crypto::keys::AttestationSignature, openkey_crypto::keys::KeyError> {
+        ) -> Result<openkey_crypto::keys::AttestationSignature, openkey_crypto::keys::KeyError>
+        {
             Err(openkey_crypto::keys::KeyError::Unsupported)
         }
 
         fn public_key(
             &self,
             _algorithm: AttestationAlgorithm,
-        ) -> Result<openkey_crypto::keys::AttestationPublicKey, openkey_crypto::keys::KeyError> {
+        ) -> Result<openkey_crypto::keys::AttestationPublicKey, openkey_crypto::keys::KeyError>
+        {
             Err(openkey_crypto::keys::KeyError::Unsupported)
         }
 
