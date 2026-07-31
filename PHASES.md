@@ -135,7 +135,7 @@ Implementar a infraestrutura de segurança.
 
 ### Gate
 
-* [ ] Revisão de segurança
+* [x] Revisão de segurança (4 findings MEDIUM corrigidos — commit `028fa8b`)
 * [x] Testes aprovados (36 testes — todos passando)
 
 ---

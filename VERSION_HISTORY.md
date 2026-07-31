@@ -14,7 +14,7 @@
 | [v0.2.0](#v020--par-02-architecture) | PAR-02 Architecture | ✅ Aprovado | 2026-07-24 | ADRs 0001–0009, Arquitetura |
 | [v0.3.0](#v030--par-03-platform) | PAR-03 Platform | ✅ Aprovado | 2026-07-27 | Compila, HAL estável, Testes |
 | [v0.3.1](#v031--par-03-platform-config-manager-ab-slots) | PAR-03 Platform (micro) | ✅ Aprovado | 2026-07-27 | Config A/B + AES-256-GCM |
-| [v0.4.0](#v040--par-04-security) | PAR-04 Security | 🔄 Em revisão | — | Security review, Testes |
+| [v0.4.0](#v040--par-04-security) | PAR-04 Security | ✅ Aprovado | 2026-07-31 | Security review (4 fixes), Testes (36/36) |
 | v0.5.0 | PAR-05 Protocols | ⏳ Pendente | — | Interop tests |
 | v0.6.0 | PAR-06 Host Tools | ⏳ Pendente | — | Integração SDK/CLI |
 | v0.7.0 | PAR-07 Validation | ⏳ Pendente | — | Todos testes, Cobertura |
@@ -391,12 +391,12 @@ Requisito crítico: persistência autenticada e confidencial de configuração d
 
 | Campo | Valor |
 |-------|-------|
-| **Versão** | v0.4.0-dev (em desenvolvimento) |
+| **Versão** | v0.4.0 |
 | **Fase** | PAR-04 — Security |
-| **Data da alteração** | Em andamento (iniciada 2026-07-27) |
+| **Data da alteração** | 2026-07-31 |
 | **Objetivo da fase** | Implementar infraestrutura de segurança: Secure Boot, Secure Storage, Key Management, OTP Interface, Device Identity |
-| **Status** | 🔄 Em revisão (≈100%) |
-| **Gate** | ☐ Security review · ☑ Testes aprovados |
+| **Status** | ✅ Aprovado (100%) |
+| **Gate** | ✅ Security review (4 fixes aplicados) · ✅ Testes aprovados (36/36) |
 
 ### Alterações Realizadas
 
@@ -453,6 +453,15 @@ Requisito crítico: persistência autenticada e confidencial de configuração d
 
 ### Correções Aplicadas
 
+#### Security Review (2026-07-31) — 4 findings MEDIUM corrigidos
+
+- **CryptoRng bound em Ed25519**: `generate_ed25519<R: RngCore + CryptoRng>` — adicionado bound `CryptoRng` para consistência com `generate_p256` (`keys.rs:153`)
+- **Nonce/tag storage overflow**: Adicionada constante `MAX_ENCRYPTED_DATA_SIZE = PAGE_DATA_SIZE - NONCE_SIZE - TAG_SIZE` e remoção do fallback de nonce-zero no caminho de leitura (`storage/src/lib.rs:36, 331-340`)
+- **Double-hashing em P-256 verify**: Substituído `verify()` por `verify_digest()` para evitar hash duplo de SHA-256 em `verify_p256_signature()` (`keys.rs:232-236`)
+- **HKDF não-padrão**: Reemplacado implementação não-padrão de HKDF com `hkdf` crate (RFC 5869) em `derive_attestation_key()` (`keys.rs:273-293`, `Cargo.toml`)
+
+#### Correções de implementação
+
 - **Storage AAD bug**: Header era serializado após a criptografia, causando mismatch de AAD entre escrita (zeros) e leitura (bytes reais do header). Corrigido serializando o header antes da criptografia.
 - **P-256 public key**: Usado `to_encoded_point(false)` + `as_bytes()` ao invés de `to_sec1_bytes()` (feature não disponível)
 - **P-256 key generation**: Usado `SigningKey::random(rng)` ao invés de `from_slice` com bytes aleatórios (não validados modularmente)
@@ -493,6 +502,7 @@ Estabelecer a base de confiança (Root of Trust) no firmware: boot seguro, armaz
 - Device Identity válida e verificável no boot ✅
 - TRNG health checks funcionais ✅
 - Codebase 100% safe Rust com Miri no CI ✅
+- Security review concluída (4 findings MEDIUM corrigidos) ✅
 
 ---
 
@@ -584,6 +594,7 @@ Estabelecer a base de confiança (Root of Trust) no firmware: boot seguro, armaz
 | Versão | Data | Autor | Alteração |
 |--------|------|-------|-----------|
 | 1.0 | 2026-07-29 | OpenKey Team | Criação inicial com PAR-01 a PAR-04 documentadas |
+| 1.1 | 2026-07-31 | OpenKey Team | Security review PAR-04 completa — 4 findings MEDIUM corrigidos, gate aprovado |
 | — | — | — | — |
 
 ---
@@ -601,4 +612,4 @@ Estabelecer a base de confiança (Root of Trust) no firmware: boot seguro, armaz
 
 ---
 
-*Fim do documento. Próxima atualização: conclusão de SEC-001 (Secure Boot) → v0.4.1*
+*Fim do documento. Próxima atualização: início de PAR-05 (Protocols) → v0.5.0*
