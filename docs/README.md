@@ -136,6 +136,9 @@ Documentação técnica precisa. Descreve APIs, estruturas, protocolos e compone
 ### ADR (Architecture Decision Records)
 - [Índice de ADRs](reference/adr/README.md)
 
+### Desenvolvimento
+- [Git Branch Strategy](development/git-branch-strategy.md)
+
 ---
 
 ## 📖 Explanation (Conceitos)
