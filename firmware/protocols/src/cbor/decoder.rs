@@ -5,6 +5,9 @@ use crate::cbor::value::{compare_canonical_map_keys, CborValue};
 use core::cmp::Ordering;
 use core::str;
 
+/// Profundidade máxima de aninhamento permitida para elementos CBOR
+pub const MAX_CBOR_DEPTH: usize = 32;
+
 /// Decodificador CBOR com validação estrita de regras de canonicidade
 #[derive(Debug, Clone)]
 pub struct CborDecoder<'a> {
@@ -220,6 +223,9 @@ impl<'a> CborDecoder<'a> {
     pub fn decode_array_header(&mut self) -> Result<u32> {
         let (mt, val) = self.decode_header()?;
         if mt == 4 {
+            if val > u32::MAX as u64 {
+                return Err(CborError::InvalidLength);
+            }
             Ok(val as u32)
         } else {
             Err(CborError::InvalidMajorType(mt))
@@ -230,6 +236,9 @@ impl<'a> CborDecoder<'a> {
     pub fn decode_map_header(&mut self) -> Result<u32> {
         let (mt, val) = self.decode_header()?;
         if mt == 5 {
+            if val > u32::MAX as u64 {
+                return Err(CborError::InvalidLength);
+            }
             Ok(val as u32)
         } else {
             Err(CborError::InvalidMajorType(mt))
@@ -240,13 +249,18 @@ impl<'a> CborDecoder<'a> {
     /// Útil para validação de ordenação de chaves em mapas.
     pub fn skip_value_slice(&mut self) -> Result<&'a [u8]> {
         let start_pos = self.position;
-        self.skip_value()?;
+        self.skip_value(0)?;
         let end_pos = self.position;
         Ok(&self.buffer[start_pos..end_pos])
     }
 
-    /// Pula um elemento CBOR completo recursivamente
-    pub fn skip_value(&mut self) -> Result<()> {
+    /// Pula um elemento CBOR completo recursivamente.
+    /// `depth` é o nível atual de aninhamento; chamadas externas devem passar `0`
+    /// e chamadas recursivas devem passar `depth + 1`.
+    pub fn skip_value(&mut self, depth: usize) -> Result<()> {
+        if depth > MAX_CBOR_DEPTH {
+            return Err(CborError::DepthLimitExceeded);
+        }
         let (mt, val) = self.decode_header()?;
         match mt {
             0 | 1 => Ok(()),
@@ -255,17 +269,23 @@ impl<'a> CborDecoder<'a> {
                 Ok(())
             }
             4 => {
+                if val > u32::MAX as u64 {
+                    return Err(CborError::InvalidLength);
+                }
                 let count = val as u32;
                 for _ in 0..count {
-                    self.skip_value()?;
+                    self.skip_value(depth + 1)?;
                 }
                 Ok(())
             }
             5 => {
+                if val > u32::MAX as u64 {
+                    return Err(CborError::InvalidLength);
+                }
                 let count = val as u32;
                 for _ in 0..count {
-                    self.skip_value()?; // key
-                    self.skip_value()?; // value
+                    self.skip_value(depth + 1)?; // key
+                    self.skip_value(depth + 1)?; // value
                 }
                 Ok(())
             }
@@ -277,17 +297,21 @@ impl<'a> CborDecoder<'a> {
     /// Decodifica um mapa validando estritamente a ordenação canônica de chaves (RFC 8949 4.2.1)
     /// e que não existem chaves duplicadas.
     /// A closure `entry_callback(key_decoder, val_decoder)` é chamada para cada par.
-    pub fn decode_map_canonical<F>(&mut self, mut entry_callback: F) -> Result<()>
+    /// `depth` é o nível atual de aninhamento; chamadas externas devem passar `0`.
+    pub fn decode_map_canonical<F>(&mut self, depth: usize, mut entry_callback: F) -> Result<()>
     where
         F: FnMut(&mut CborDecoder<'a>) -> Result<()>,
     {
+        if depth > MAX_CBOR_DEPTH {
+            return Err(CborError::DepthLimitExceeded);
+        }
         let count = self.decode_map_header()?;
         let mut prev_key_start: Option<(usize, usize)> = None;
 
         for _ in 0..count {
             let key_start = self.position;
             // Valida chave lendo os bytes inteiros da chave
-            self.skip_value()?;
+            self.skip_value(depth + 1)?;
             let key_end = self.position;
 
             let current_key_slice = &self.buffer[key_start..key_end];

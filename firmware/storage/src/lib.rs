@@ -243,11 +243,15 @@ where
         if !offset.is_multiple_of(PAGE_SIZE as u32) {
             return Err(StorageError::Unsupported);
         }
-        self.slots[index] = Some(StorageSlot {
+        let slot = StorageSlot {
             offset,
             page_count,
             data_type,
-        });
+        };
+        // Retoma o contador de sequência do maior valor já gravado na flash,
+        // garantindo que novas escritas sejam monotônicas após reboot.
+        self.sequence = self.sequence.max(self.scan_max_sequence(&slot));
+        self.slots[index] = Some(slot);
         Ok(())
     }
 
@@ -369,6 +373,8 @@ where
                 .unwrap_or((0, 0, 0))
         });
 
+        let mut max_seq = 0u32;
+
         for (offset, page_count, _data_type) in slots.iter() {
             for i in 0..*page_count {
                 let page_offset = offset + (i as u32) * PAGE_SIZE as u32;
@@ -381,6 +387,14 @@ where
                     Ok(h) => h,
                     Err(_) => continue,
                 };
+
+                if matches!(
+                    header.state,
+                    PageState::Active | PageState::Writing | PageState::Obsolete
+                ) && header.sequence > max_seq
+                {
+                    max_seq = header.sequence;
+                }
 
                 match header.state {
                     PageState::Writing => {
@@ -402,6 +416,10 @@ where
                 }
             }
         }
+
+        // Retoma o contador de sequência do maior valor encontrado na flash
+        self.sequence = self.sequence.max(max_seq);
+
         Ok(())
     }
 
@@ -412,7 +430,7 @@ where
         header: &PageHeader,
     ) -> Result<bool, StorageError> {
         let data_len = header.data_len as usize;
-        if data_len > PAGE_DATA_SIZE {
+        if data_len > MAX_ENCRYPTED_DATA_SIZE {
             return Ok(false);
         }
 
@@ -480,7 +498,12 @@ where
         }
 
         let data_len = header.data_len as usize;
-        if data_len > PAGE_DATA_SIZE || data_len > output.len() {
+        // data_len > MAX_ENCRYPTED_DATA_SIZE indica página corrompida
+        // (o nonce/tag não cabem), tratada como erro de integridade
+        if data_len > MAX_ENCRYPTED_DATA_SIZE {
+            return Err(StorageError::CorruptedData);
+        }
+        if data_len > output.len() {
             return Err(StorageError::BufferTooSmall);
         }
 
@@ -524,8 +547,8 @@ where
 
     /// Encontra a próxima página gravável no slot (wear-leveling circular)
     fn find_writable_page(&mut self, slot: &StorageSlot) -> Result<usize, StorageError> {
-        let mut latest_idx = 0;
-        let mut latest_seq = 0u32;
+        let mut oldest_idx = 0;
+        let mut oldest_seq = u32::MAX;
         let mut empty_idx = None;
 
         for i in 0..slot.page_count {
@@ -548,9 +571,9 @@ where
                     }
                 }
                 PageState::Active => {
-                    if header.sequence >= latest_seq {
-                        latest_seq = header.sequence.wrapping_add(1);
-                        latest_idx = i;
+                    if header.sequence < oldest_seq {
+                        oldest_seq = header.sequence;
+                        oldest_idx = i;
                     }
                 }
                 PageState::Writing | PageState::Obsolete | PageState::Corrupted => {
@@ -566,8 +589,35 @@ where
             return Ok(idx);
         }
 
-        // Caso contrário, reutilizar a página mais antiga (circular)
-        Ok(latest_idx)
+        // Slot cheio: reutilizar a página mais antiga (menor sequence),
+        // preservando os dados mais recentes até o commit final
+        Ok(oldest_idx)
+    }
+
+    /// Escaneia as páginas de um slot e retorna a maior sequência encontrada
+    fn scan_max_sequence(&mut self, slot: &StorageSlot) -> u32 {
+        let mut max_seq = 0u32;
+        for i in 0..slot.page_count {
+            let page_offset = slot.offset + (i as u32) * PAGE_SIZE as u32;
+            let mut header_buf = [0u8; PAGE_HEADER_SIZE];
+            if self.flash.read(page_offset, &mut header_buf).is_err() {
+                continue;
+            }
+
+            let header = match PageHeader::deserialize(&header_buf) {
+                Ok(h) => h,
+                Err(_) => continue,
+            };
+
+            if matches!(
+                header.state,
+                PageState::Active | PageState::Writing | PageState::Obsolete
+            ) && header.sequence > max_seq
+            {
+                max_seq = header.sequence;
+            }
+        }
+        max_seq
     }
 
     /// Encontra a página ativa mais recente no slot
@@ -664,13 +714,13 @@ mod tests {
 
     /// Simulador de flash para testes
     struct MockFlash {
-        storage: [u8; 8192],
+        storage: [u8; 16 * PAGE_SIZE],
     }
 
     impl MockFlash {
         const fn new() -> Self {
             Self {
-                storage: [0xFF; 8192],
+                storage: [0xFF; 16 * PAGE_SIZE],
             }
         }
     }
@@ -909,6 +959,111 @@ mod tests {
         storage.configure_slot(0, 0, 4, 0x01).unwrap();
         let mut output = [0u8; 64];
         assert!(storage.read_encrypted(0, &mut output).is_err());
+    }
+
+    #[test]
+    fn test_wear_leveling_rewrites_oldest_page() {
+        let mut flash = MockFlash::new();
+        let key_provider = MockKeyProvider;
+        let mut rng = MockRng;
+
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+
+            // Preenche o slot com 4 escritas (uma por página, seq 1..=4)
+            for i in 0..4 {
+                storage.write_encrypted(0, &[i as u8 + 1; 8]).unwrap();
+            }
+
+            // 5ª escrita com slot cheio: deve reescrever a página mais antiga (page 0)
+            storage.write_encrypted(0, b"final").unwrap();
+        }
+
+        // A página 0 (antiga) deve agora conter a sequência mais recente (5)
+        let mut header_buf = [0u8; PAGE_HEADER_SIZE];
+        flash.read(0, &mut header_buf).unwrap();
+        let header = PageHeader::deserialize(&header_buf).unwrap();
+        assert_eq!(header.state, PageState::Active);
+        assert_eq!(header.sequence, 5);
+
+        // A página mais recente anterior (page 3, seq 4) deve estar preservada
+        let mut header_buf = [0u8; PAGE_HEADER_SIZE];
+        flash.read(3 * PAGE_SIZE as u32, &mut header_buf).unwrap();
+        let header = PageHeader::deserialize(&header_buf).unwrap();
+        assert_eq!(header.state, PageState::Active);
+        assert_eq!(header.sequence, 4);
+
+        // A leitura deve retornar o dado mais recente
+        let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+        storage.configure_slot(0, 0, 4, 0x01).unwrap();
+        let mut output = [0u8; 64];
+        let read_len = storage.read_encrypted(0, &mut output).unwrap();
+        assert_eq!(read_len, b"final".len());
+        assert_eq!(&output[..read_len], b"final");
+    }
+
+    #[test]
+    fn test_sequence_continues_after_reboot() {
+        let mut flash = MockFlash::new();
+        let key_provider = MockKeyProvider;
+        let mut rng = MockRng;
+
+        // Primeira sessão: escreve 3 versões (seq 1, 2, 3)
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            storage.write_encrypted(0, b"v1").unwrap();
+            storage.write_encrypted(0, b"v2").unwrap();
+            storage.write_encrypted(0, b"v3").unwrap();
+        }
+
+        // "Reboot": nova instância do gerenciador sobre a mesma flash
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            // A sequência deve continuar do máximo encontrado na flash
+            storage.write_encrypted(0, b"v4").unwrap();
+
+            // A leitura deve retornar v4 (com o bug, v4 recebia seq 1 e era perdida)
+            let mut output = [0u8; 64];
+            let read_len = storage.read_encrypted(0, &mut output).unwrap();
+            assert_eq!(read_len, b"v4".len());
+            assert_eq!(&output[..read_len], b"v4");
+        }
+    }
+
+    #[test]
+    fn test_oversized_data_len_no_panic_and_marked_corrupted() {
+        let mut flash = MockFlash::new();
+        let key_provider = MockKeyProvider;
+        let mut rng = MockRng;
+
+        // data_len no intervalo perigoso: > MAX_ENCRYPTED_DATA_SIZE e <= PAGE_DATA_SIZE,
+        // o que estourava o array de página ao extrair o nonce
+        let bad_len = (MAX_ENCRYPTED_DATA_SIZE + 20) as u16;
+        assert!(bad_len as usize <= PAGE_DATA_SIZE);
+        let header_bytes = PageHeader::new(0x01, bad_len, 1).serialize();
+        flash.write(0, &header_bytes).unwrap();
+
+        // Leitura não deve entrar em panic; trata como corrompida
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            let mut output = [0u8; 64];
+            assert!(storage.read_encrypted(0, &mut output).is_err());
+        }
+
+        // Recuperação não deve entrar em panic; marca a página como corrompida
+        {
+            let mut storage = StorageManager::new(&mut flash, &key_provider, &mut rng);
+            storage.configure_slot(0, 0, 4, 0x01).unwrap();
+            storage.recover_power_loss().unwrap();
+            let mut header_buf = [0u8; PAGE_HEADER_SIZE];
+            flash.read(0, &mut header_buf).unwrap();
+            let header = PageHeader::deserialize(&header_buf).unwrap();
+            assert_eq!(header.state, PageState::Corrupted);
+        }
     }
 
     #[test]

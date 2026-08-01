@@ -13,12 +13,13 @@ use ed25519_dalek::{
     Signature as Ed25519Signature, Signer, SigningKey as Ed25519SigningKey,
     Verifier as Ed25519Verifier, VerifyingKey as Ed25519VerifyingKey,
 };
-use p256::ecdsa::signature::DigestVerifier;
+use p256::ecdsa::signature::hazmat::PrehashVerifier;
 use p256::ecdsa::{
     Signature as P256Signature, SigningKey as P256SigningKey, VerifyingKey as P256VerifyingKey,
 };
 use p256::elliptic_curve::rand_core::{CryptoRng, RngCore};
 use sha2::{Digest, Sha256};
+use zeroize::Zeroizing;
 
 /// Tamanho de uma chave P-256 em bytes (ponto X + Y = 64 bytes)
 pub const P256_PUBLIC_KEY_SIZE: usize = 64;
@@ -200,11 +201,12 @@ impl EphemeralKeyPair {
                 Ok(result)
             }
             AttestationAlgorithm::Ed25519 => {
-                let private_arr: [u8; ED25519_PRIVATE_KEY_SIZE] = self
-                    .private_key
-                    .as_slice()
-                    .try_into()
-                    .map_err(|_| KeyError::InvalidKey)?;
+                // Cópia da chave privada em buffer zeroizado: o `Zeroizing`
+                // apaga os bytes da pilha via Drop quando o escopo termina.
+                let private_arr = Zeroizing::new(
+                    <[u8; ED25519_PRIVATE_KEY_SIZE]>::try_from(self.private_key.as_slice())
+                        .map_err(|_| KeyError::InvalidKey)?,
+                );
                 let signing_key = Ed25519SigningKey::from_bytes(&private_arr);
                 let signature: Ed25519Signature = signing_key.sign(message);
                 let mut result = heapless::Vec::new();
@@ -228,7 +230,7 @@ impl Drop for EphemeralKeyPair {
 /// Verifica uma assinatura ECDSA P-256
 pub fn verify_p256_signature(
     public_key: &[u8],
-    message: &[u8],
+    digest: &[u8],
     signature: &[u8],
 ) -> Result<(), KeyError> {
     // A chave pública é armazenada como X+Y (64 bytes)
@@ -242,14 +244,14 @@ pub fn verify_p256_signature(
     let verifying_key =
         P256VerifyingKey::from_sec1_bytes(&sec1_bytes).map_err(|_| KeyError::InvalidKey)?;
     let sig = P256Signature::from_der(signature).map_err(|_| KeyError::InvalidSignature)?;
-    // Usa verify_digest para evitar double-hashing: `message` já é um hash
-    // SHA-256, não deve ser hashado novamente pela função verify().
-    // Verifica a assinatura sobre o digest pré-computado em vez de deixar
-    // verify() hashear o hash novamente (double-hashing).
-    let mut hasher = Sha256::new();
-    hasher.update(message);
+    // Semântica ES256 (RFC 9053): a assinatura cobre SHA-256(dados), nunca os
+    // dados brutos. `digest` já é o hash SHA-256 pré-computado (no boot, o
+    // hash da imagem calculado por `hash_image`). Portanto NÃO hasheamos
+    // novamente: `verify_prehash` valida a assinatura diretamente sobre o
+    // digest fornecido, evitando o double-hash que ocorreria ao re-hashear
+    // `digest` com `verify()`/`update()`.
     verifying_key
-        .verify_digest(hasher, &sig)
+        .verify_prehash(digest, &sig)
         .map_err(|_| KeyError::InvalidSignature)
 }
 
@@ -336,8 +338,10 @@ mod tests {
         let message = b"test message for signing";
         let signature = keypair.sign(message).unwrap();
 
-        // Verifica a assinatura com a chave pública
-        verify_p256_signature(keypair.public_key(), message, &signature).unwrap();
+        // `sign()` hasheia a mensagem internamente (ES256); a verificação
+        // recebe o digest pré-computado SHA-256(message).
+        let digest = Sha256::digest(message);
+        verify_p256_signature(keypair.public_key(), &digest, &signature).unwrap();
     }
 
     #[test]

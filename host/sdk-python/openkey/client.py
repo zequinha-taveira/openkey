@@ -29,7 +29,7 @@ class OpenKeyDevice:
         elif cmd == CMD_CBOR:
             # Retorna CTAP2_OK + CBOR getInfo mock
             ctap_cmd = payload[0] if payload else 0
-            if ctap_cmd == 0x04:  // getInfo
+            if ctap_cmd == 0x04:  # getInfo
                 import cbor2
                 cbor_data = cbor2.dumps({
                     1: ["FIDO_2_0", "FIDO_2_1"],

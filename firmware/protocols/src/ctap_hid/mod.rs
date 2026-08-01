@@ -1,7 +1,5 @@
 //! Módulo CTAP HID Framing (FIDO CTAP2.1 Spec Section 11)
 
-use crate::cbor::Result;
-
 /// Tamanho fixo do pacote USB HID (64 bytes)
 pub const CTAPHID_PACKET_SIZE: usize = 64;
 
@@ -77,6 +75,31 @@ pub enum CtapHidErrorCode {
     Other = 0x7f,
 }
 
+/// Erros de enquadramento (framing) durante a montagem de mensagens CTAP HID
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HidError {
+    /// Payload anunciado excede o tamanho do buffer de saída
+    BufferTooSmall,
+    /// Canal (CID) inconsistente com o pacote ativo
+    InvalidChannel,
+    /// Número de sequência fora de ordem
+    InvalidSeq,
+}
+
+impl HidError {
+    /// Converte para o código de erro CTAPHID correspondente (usado no pacote `ERROR`)
+    pub fn to_ctaphid_error_code(&self) -> CtapHidErrorCode {
+        match self {
+            Self::BufferTooSmall => CtapHidErrorCode::InvalidLen,
+            Self::InvalidChannel => CtapHidErrorCode::InvalidChannel,
+            Self::InvalidSeq => CtapHidErrorCode::InvalidSeq,
+        }
+    }
+}
+
+/// Resultado das operações de montagem CTAP HID
+pub type HidResult<T> = core::result::Result<T, HidError>;
+
 /// Representação de um pacote CTAP HID bruto de 64 bytes
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CtapHidPacket<'a> {
@@ -149,6 +172,8 @@ where
     let mut pkt_buf = [0u8; CTAPHID_PACKET_SIZE];
     let total_len = payload.len();
 
+    debug_assert!(total_len <= u16::MAX as usize);
+
     let init_data_len = total_len.min(CTAPHID_INIT_PAYLOAD_SIZE);
     let init_pkt = CtapHidPacket::Init {
         cid,
@@ -219,7 +244,7 @@ impl CtapHidMessageAssembler {
         &mut self,
         packet: &CtapHidPacket<'a>,
         out_payload: &mut [u8],
-    ) -> Result<Option<(u32, u8, usize)>> {
+    ) -> HidResult<Option<(u32, u8, usize)>> {
         match packet {
             CtapHidPacket::Init {
                 cid,
@@ -229,7 +254,7 @@ impl CtapHidMessageAssembler {
             } => {
                 let len = *payload_len as usize;
                 if len > out_payload.len() {
-                    return Err(crate::cbor::CborError::BufferTooSmall);
+                    return Err(HidError::BufferTooSmall);
                 }
 
                 self.active_cid = *cid;
@@ -252,12 +277,13 @@ impl CtapHidMessageAssembler {
             }
             CtapHidPacket::Cont { cid, seq, data } => {
                 if !self.is_active() || *cid != self.active_cid {
-                    return Err(crate::cbor::CborError::InvalidMajorType(0));
+                    self.reset();
+                    return Err(HidError::InvalidChannel);
                 }
 
                 if *seq != self.next_seq {
                     self.reset();
-                    return Err(crate::cbor::CborError::NonCanonicalIntEncoding);
+                    return Err(HidError::InvalidSeq);
                 }
 
                 self.next_seq = self.next_seq.wrapping_add(1);
@@ -362,5 +388,98 @@ mod tests {
         assert_eq!(res.1, CtapHidCommand::Cbor.to_u8());
         assert_eq!(res.2, 100);
         assert_eq!(&assembled_payload[..100], &full_payload[..]);
+    }
+
+    #[test]
+    fn test_ctap_hid_cont_inconsistent_cid_resets_and_errors() {
+        let cid = 0x87654321;
+        let mut init_buf = [0u8; CTAPHID_PACKET_SIZE];
+        let mut cont_buf = [0u8; CTAPHID_PACKET_SIZE];
+
+        let p_init = CtapHidPacket::Init {
+            cid,
+            cmd: CtapHidCommand::Cbor.to_u8(),
+            payload_len: 100,
+            data: &[0u8; 57],
+        };
+        p_init.serialize(&mut init_buf);
+
+        let p_cont = CtapHidPacket::Cont {
+            cid: 0xdead_beef,
+            seq: 0,
+            data: &[0u8; 59],
+        };
+        p_cont.serialize(&mut cont_buf);
+
+        let mut assembler = CtapHidMessageAssembler::new();
+        let mut assembled_payload = [0u8; 128];
+
+        let pkt1 = CtapHidPacket::parse(&init_buf).unwrap();
+        assert!(assembler
+            .process_packet(&pkt1, &mut assembled_payload)
+            .unwrap()
+            .is_none());
+        assert!(assembler.is_active());
+
+        let pkt2 = CtapHidPacket::parse(&cont_buf).unwrap();
+        assert_eq!(
+            assembler.process_packet(&pkt2, &mut assembled_payload),
+            Err(HidError::InvalidChannel)
+        );
+        assert!(!assembler.is_active());
+    }
+
+    #[test]
+    fn test_ctap_hid_cont_out_of_order_seq_resets_and_errors() {
+        let cid = 0x87654321;
+        let mut init_buf = [0u8; CTAPHID_PACKET_SIZE];
+        let mut cont_buf = [0u8; CTAPHID_PACKET_SIZE];
+
+        let p_init = CtapHidPacket::Init {
+            cid,
+            cmd: CtapHidCommand::Cbor.to_u8(),
+            payload_len: 100,
+            data: &[0u8; 57],
+        };
+        p_init.serialize(&mut init_buf);
+
+        let p_cont = CtapHidPacket::Cont {
+            cid,
+            seq: 1,
+            data: &[0u8; 59],
+        };
+        p_cont.serialize(&mut cont_buf);
+
+        let mut assembler = CtapHidMessageAssembler::new();
+        let mut assembled_payload = [0u8; 128];
+
+        let pkt1 = CtapHidPacket::parse(&init_buf).unwrap();
+        assert!(assembler
+            .process_packet(&pkt1, &mut assembled_payload)
+            .unwrap()
+            .is_none());
+
+        let pkt2 = CtapHidPacket::parse(&cont_buf).unwrap();
+        assert_eq!(
+            assembler.process_packet(&pkt2, &mut assembled_payload),
+            Err(HidError::InvalidSeq)
+        );
+        assert!(!assembler.is_active());
+    }
+
+    #[test]
+    fn test_ctap_hid_error_code_mapping() {
+        assert_eq!(
+            HidError::BufferTooSmall.to_ctaphid_error_code(),
+            CtapHidErrorCode::InvalidLen
+        );
+        assert_eq!(
+            HidError::InvalidChannel.to_ctaphid_error_code(),
+            CtapHidErrorCode::InvalidChannel
+        );
+        assert_eq!(
+            HidError::InvalidSeq.to_ctaphid_error_code(),
+            CtapHidErrorCode::InvalidSeq
+        );
     }
 }

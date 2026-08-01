@@ -104,9 +104,9 @@ mod tests {
         let len = resp.encode_cbor(&mut buf).unwrap();
 
         let mut dec = CborDecoder::new(&buf[..len]);
-        dec.decode_map_canonical(|entry_dec| {
-            entry_dec.skip_value()?;
-            entry_dec.skip_value()?;
+        dec.decode_map_canonical(0, |entry_dec| {
+            entry_dec.skip_value(0)?;
+            entry_dec.skip_value(0)?;
             Ok(())
         })
         .unwrap();
