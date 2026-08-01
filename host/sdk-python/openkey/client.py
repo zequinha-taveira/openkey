@@ -2,7 +2,6 @@
 
 from typing import Optional
 from openkey.transport import (
-    CtapHidMessageAssembler,
     CMD_CBOR,
     CMD_INIT,
     CTAPHID_BROADCAST_CID,
@@ -16,6 +15,27 @@ class OpenKeyDevice:
         self._cid = CTAPHID_BROADCAST_CID
         self._backend = transport_backend
         self._ctap2: Optional[Ctap2Client] = None
+
+    @classmethod
+    def from_hid(cls, vid=None, pid=None, serial_number=None, path=None) -> "OpenKeyDevice":
+        """Cria um dispositivo conectado via USB HID real (hidapi).
+
+        Descobre/abre o dispositivo, executa CTAPHID_INIT e retorna uma
+        instância pronta para uso.
+        """
+        from openkey.hid import open_device, OPENKEY_VID, OPENKEY_PID
+        backend = open_device(
+            vid=vid if vid is not None else OPENKEY_VID,
+            pid=pid if pid is not None else OPENKEY_PID,
+            serial_number=serial_number,
+            path=path,
+        )
+        dev = cls(transport_backend=backend)
+        dev._cid = backend.cid or CTAPHID_BROADCAST_CID
+        dev._ctap2 = Ctap2Client(
+            lambda cmd, payload: dev._send_ctaphid(CMD_CBOR, bytes([cmd]) + payload)
+        )
+        return dev
 
     def _send_ctaphid(self, cmd: int, payload: bytes) -> bytes:
         if self._backend:

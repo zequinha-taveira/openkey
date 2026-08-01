@@ -15,6 +15,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+hid = [
+    "hidapi>=0.10.0",
+]
 dev = [
     "pytest>=7.0",
+    "hidapi>=0.10.0",
 ]
