@@ -26,10 +26,29 @@ jobs:
         run: cargo fmt --check
 
       - name: Run Clippy Linter
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets --exclude openkey-target-rp2350 -- -D warnings
 
       - name: Run Workspace Unit Tests
         run: cargo test --workspace
+
+  embedded-firmware:
+    name: Embedded Firmware (RP2350)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: thumbv8m.main-none-eabihf
+
+      - name: Check RP2350 Firmware
+        run: cargo check -p openkey-target-rp2350 --target thumbv8m.main-none-eabihf
+
+      - name: Clippy RP2350 Firmware
+        run: cargo clippy -p openkey-target-rp2350 --target thumbv8m.main-none-eabihf -- -D warnings
 
   miri-check:
     name: Miri UB Detection
