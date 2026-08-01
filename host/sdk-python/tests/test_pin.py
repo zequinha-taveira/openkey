@@ -1,7 +1,8 @@
 import unittest
+import hashlib
 import cbor2
 
-from openkey.ctap2 import CMD_CLIENT_PIN, Ctap2Client
+from openkey.ctap2 import CMD_CLIENT_PIN, CMD_CREDENTIAL_MGMT, Ctap2Client
 from openkey.exceptions import CtapError
 from openkey.pin import (
     PIN_PROTOCOL_V1,
@@ -30,6 +31,7 @@ class FakeAuthenticatorPin:
         self._private_key = PinUvAuthProtocol._new_test_keypair() if False else None
         self._stored_pin_hash = None
         self._set_private_key()
+        self._credentials = []
 
     def _set_private_key(self):
         from cryptography.hazmat.primitives.asymmetric import ec
@@ -48,6 +50,9 @@ class FakeAuthenticatorPin:
             if cmd == CMD_CLIENT_PIN:
                 params = cbor2.loads(payload)
                 return b"\x00" + cbor2.dumps(self._handle(params))
+            if cmd == CMD_CREDENTIAL_MGMT:
+                params = cbor2.loads(payload)
+                return b"\x00" + cbor2.dumps(self._handle_credential_mgmt(params))
             raise AssertionError(f"comando inesperado: 0x{cmd:02x}")
 
         return Ctap2Client(send)
@@ -196,6 +201,110 @@ class FakeAuthenticatorPin:
     def _hmac_equals(a: bytes, b: bytes) -> bool:
         # comparação em tempo constante
         return hmac_compare(a, b)
+
+    # ------------------------------------------------------------------
+    # authenticatorCredentialManagement (simulado)
+    # ------------------------------------------------------------------
+
+    def _token_expected(self) -> bytes:
+        """Token que o autenticador retornaria em getPINToken."""
+        shared = self._shared_secret_for_last_peer()
+        return self._hmac(self._hmac_key(shared), b"\x00" * 32)
+
+    def _shared_secret_for_last_peer(self) -> bytes:
+        peer = _cose_key_from_bytes(self._last_peer_x, self._last_peer_y)
+        return self._shared_secret(peer)
+
+    def _check_cm_auth(self, params: dict, message: bytes):
+        auth = params[4]
+        expected = self._hmac(self._token_expected(), message)
+        if not self._hmac_equals(auth, expected):
+            raise CtapError(0x30)  # CTAP2_ERR_PIN_AUTH_INVALID
+
+    def _handle_credential_mgmt(self, params: dict) -> dict:
+        sub = params[1]
+        if sub == 0x01:  # getCredsMetadata
+            self._check_cm_auth(params, b"\x01")
+            return {1: len(self._credentials), 2: 32}
+        if sub == 0x02:  # enumerateRPsBegin
+            self._check_cm_auth(params, b"\x02")
+            rps = self._distinct_rps()
+            self._rp_cursor = 1
+            first = rps[0] if rps else None
+            resp = {1: len(rps)}
+            if first is not None:
+                resp[2] = {1: first, 2: first}
+            return resp
+        if sub == 0x03:  # enumerateRPsGetNextRP
+            self._check_cm_auth(params, b"\x03")
+            rps = self._distinct_rps()
+            idx = self._rp_cursor
+            self._rp_cursor += 1
+            if idx < len(rps):
+                return {1: len(rps), 2: {1: rps[idx], 2: rps[idx]}}
+            return {1: len(rps)}
+        if sub == 0x04:  # enumerateCredentialsBegin
+            rp_id = params[5]
+            rp_hash = hashlib.sha256(rp_id.encode("utf-8")).digest()
+            self._check_cm_auth(params, b"\x04" + rp_hash)
+            creds = self._credentials_for_rp(rp_id)
+            self._cred_cursor = 1
+            resp = {1: len(creds)}
+            if creds:
+                resp[2] = self._credential_info(creds[0])
+                resp[3] = creds[0]["user"]
+                resp[4] = {1: rp_id, 2: rp_id}
+            return resp
+        if sub == 0x05:  # enumerateCredentialsGetNextCredential
+            self._check_cm_auth(params, b"\x05")
+            rp_id = params[5]
+            creds = self._credentials_for_rp(rp_id)
+            idx = self._cred_cursor
+            self._cred_cursor += 1
+            if idx < len(creds):
+                return {
+                    1: len(creds),
+                    2: self._credential_info(creds[idx]),
+                    3: creds[idx]["user"],
+                    4: {1: rp_id, 2: rp_id},
+                }
+            return {1: len(creds)}
+        if sub == 0x06:  # deleteCredential
+            desc = params[6]
+            cred_id = desc[1]
+            self._check_cm_auth(params, b"\x06" + cred_id)
+            before = len(self._credentials)
+            self._credentials = [c for c in self._credentials if c["id"] != cred_id]
+            if len(self._credentials) == before:
+                raise CtapError(0x2F)  # CTAP2_ERR_CREDENTIAL_NOT_FOUND
+            return {}
+        raise AssertionError(f"subcomando CM inesperado: {sub}")
+
+    def _distinct_rps(self) -> list:
+        rps = []
+        for c in self._credentials:
+            if c["rp_id"] not in rps:
+                rps.append(c["rp_id"])
+        return rps
+
+    def _credentials_for_rp(self, rp_id: str) -> list:
+        return [c for c in self._credentials if c["rp_id"] == rp_id]
+
+    def _credential_info(self, c: dict) -> dict:
+        return {
+            1: {1: c["id"], 2: "public-key"},
+            3: c["rp_id"],
+        }
+
+    def add_credential(self, rp_id: str, user_id: bytes, user_name: str, cred_id: bytes):
+        """Insere uma credencial residente no autenticador simulado."""
+        self._credentials.append(
+            {
+                "rp_id": rp_id,
+                "id": cred_id,
+                "user": {1: user_id, 2: user_name, 3: user_name},
+            }
+        )
 
 
 def hmac_compare(a: bytes, b: bytes) -> bool:

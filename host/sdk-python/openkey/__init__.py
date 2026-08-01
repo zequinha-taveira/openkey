@@ -17,6 +17,28 @@ from openkey.pin_client import (
     setup_pin,
     change_device_pin,
 )
+from openkey.credential_management import (
+    CredentialManagementClient,
+    CredentialManagementError,
+    RpInfo,
+    UserInfo,
+    CredentialInfo,
+)
+from openkey.webauthn import (
+    AuthenticatorData,
+    AssertionResponse,
+    MakeCredentialResponse,
+    PublicKeyCredentialDescriptor,
+    RpEntity,
+    UserEntity,
+    WebAuthnError,
+)
+from openkey.ctap2 import (
+    CtapLogEntry,
+    CtapLogRecorder,
+    LOG_SEND,
+    LOG_RECV,
+)
 
 __version__ = "0.6.0"
 
@@ -42,4 +64,20 @@ __all__ = [
     "PinClient",
     "setup_pin",
     "change_device_pin",
+    "CredentialManagementClient",
+    "CredentialManagementError",
+    "RpInfo",
+    "UserInfo",
+    "CredentialInfo",
+    "AuthenticatorData",
+    "AssertionResponse",
+    "MakeCredentialResponse",
+    "PublicKeyCredentialDescriptor",
+    "RpEntity",
+    "UserEntity",
+    "WebAuthnError",
+    "CtapLogEntry",
+    "CtapLogRecorder",
+    "LOG_SEND",
+    "LOG_RECV",
 ]

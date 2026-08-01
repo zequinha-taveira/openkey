@@ -6,18 +6,19 @@ from openkey.transport import (
     CMD_INIT,
     CTAPHID_BROADCAST_CID,
 )
-from openkey.ctap2 import Ctap2Client, GetInfoResponse
+from openkey.ctap2 import Ctap2Client, GetInfoResponse, CtapLogHook
 
 class OpenKeyDevice:
     """Dispositivo OpenKey (físico USB ou emulado)"""
 
-    def __init__(self, transport_backend=None):
+    def __init__(self, transport_backend=None, log_hook: Optional[CtapLogHook] = None):
         self._cid = CTAPHID_BROADCAST_CID
         self._backend = transport_backend
+        self._log_hook = log_hook
         self._ctap2: Optional[Ctap2Client] = None
 
     @classmethod
-    def from_hid(cls, vid=None, pid=None, serial_number=None, path=None) -> "OpenKeyDevice":
+    def from_hid(cls, vid=None, pid=None, serial_number=None, path=None, log_hook=None) -> "OpenKeyDevice":
         """Cria um dispositivo conectado via USB HID real (hidapi).
 
         Descobre/abre o dispositivo, executa CTAPHID_INIT e retorna uma
@@ -30,10 +31,11 @@ class OpenKeyDevice:
             serial_number=serial_number,
             path=path,
         )
-        dev = cls(transport_backend=backend)
+        dev = cls(transport_backend=backend, log_hook=log_hook)
         dev._cid = backend.cid or CTAPHID_BROADCAST_CID
         dev._ctap2 = Ctap2Client(
-            lambda cmd, payload: dev._send_ctaphid(CMD_CBOR, bytes([cmd]) + payload)
+            lambda cmd, payload: dev._send_ctaphid(CMD_CBOR, bytes([cmd]) + payload),
+            log_hook=log_hook,
         )
         return dev
 
@@ -67,7 +69,10 @@ class OpenKeyDevice:
         """Inicializa o canal CTAPHID e descobre o dispositivo"""
         # Executa INIT
         self._send_ctaphid(CMD_INIT, b"\x01\x02\x03\x04\x05\x06\x07\x08")
-        self._ctap2 = Ctap2Client(lambda cmd, payload: self._send_ctaphid(CMD_CBOR, bytes([cmd]) + payload))
+        self._ctap2 = Ctap2Client(
+            lambda cmd, payload: self._send_ctaphid(CMD_CBOR, bytes([cmd]) + payload),
+            log_hook=self._log_hook,
+        )
         return self
 
     def get_info(self) -> GetInfoResponse:
