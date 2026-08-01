@@ -35,13 +35,13 @@ headless) + `ui/` (PySide6). Depende de gaps do `host/sdk-python`.
 - [ ] **G10-T01**: Criar ADR-0013 (framework GUI + resolução de layout) e atualizar documentação
 - [x] **G10-T02**: SDK — backend USB HID (hidapi) + descoberta de dispositivos + testes
 - [x] **G10-T03**: SDK — protocolo ClientPIN (set_pin, change_pin, get_pin_token) + testes
-- [ ] **G10-T04**: SDK — CredentialManagement (enumerate_rps, enumerate_credentials, delete_credential) + testes
-- [ ] **G10-T05**: SDK — make_credential / get_assertion + hook de logging de pacotes CTAP + testes
-- [ ] **G10-T06**: Scaffold da GUI — pyproject, bootstrap, MainWindow/navegação, core/models.py + DeviceController + testes
-- [ ] **G10-T07**: Página de dispositivo + descoberta + auto-refresh (attach/detach)
-- [ ] **G10-T08**: Página de credenciais residentes (listar/ver/remover) + testes
-- [ ] **G10-T09**: Diálogo de PIN (set/change) + padrão de confirmação + testes
-- [ ] **G10-T10**: Serviço de diagnósticos (em `host/diagnostics/`) + página + testes
+- [x] **G10-T04**: SDK — CredentialManagement (enumerate_rps, enumerate_credentials, delete_credential) + testes
+- [x] **G10-T05**: SDK — make_credential / get_assertion + hook de logging de pacotes CTAP + testes
+- [x] **G10-T06**: Scaffold da GUI — pyproject, bootstrap, MainWindow/navegação, core/models.py + DeviceController + testes
+- [x] **G10-T07**: Página de dispositivo + descoberta + auto-refresh (attach/detach)
+- [x] **G10-T08**: Página de credenciais residentes (listar/ver/remover) + testes
+- [x] **G10-T09**: Diálogo de PIN (set/change) + padrão de confirmação + testes
+- [x] **G10-T10**: Serviço de diagnósticos (em `host/diagnostics/`) + página + testes
 - [ ] **G10-T11**: Assistente visual de atualização de firmware (reuso FirmwareUpdater) + UpdateService + testes
 
 ### Prioridade Média
