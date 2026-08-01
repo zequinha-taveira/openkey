@@ -63,8 +63,9 @@ impl Ctap2Engine {
             | Ctap2Command::Selection
             | Ctap2Command::LargeBlobs
             | Ctap2Command::Config => {
-                // Stubs para comandos adicionais — retornam OK com status base por enquanto
-                out_buf[0] = Ctap2Status::Ok.to_u8();
+                // Stubs para comandos adicionais — não implementados; retornam erro explícito
+                // em vez de um status OK enganoso (que faria o host falhar ao parsear CBOR).
+                out_buf[0] = Ctap2Status::ErrNotAllowed.to_u8();
                 1
             }
         }
@@ -97,5 +98,32 @@ mod tests {
         let len = Ctap2Engine::handle_request(0xfe, &[], [0; 16], false, &mut resp_buf);
         assert_eq!(len, 1);
         assert_eq!(resp_buf[0], Ctap2Status::ErrInvalidCommand.to_u8());
+    }
+
+    #[test]
+    fn test_ctap2_engine_unimplemented_stubs_return_error() {
+        let stub_commands = [
+            Ctap2Command::MakeCredential,
+            Ctap2Command::GetAssertion,
+            Ctap2Command::ClientPin,
+            Ctap2Command::Reset,
+            Ctap2Command::GetNextAssertion,
+            Ctap2Command::BioEnrollment,
+            Ctap2Command::CredentialManagement,
+            Ctap2Command::Selection,
+            Ctap2Command::LargeBlobs,
+            Ctap2Command::Config,
+        ];
+        for cmd in stub_commands {
+            let mut resp_buf = [0u8; 16];
+            let len = Ctap2Engine::handle_request(cmd.to_u8(), &[], [0; 16], false, &mut resp_buf);
+            assert_eq!(len, 1, "command {:?}", cmd);
+            assert_eq!(
+                resp_buf[0],
+                Ctap2Status::ErrNotAllowed.to_u8(),
+                "command {:?}",
+                cmd
+            );
+        }
     }
 }

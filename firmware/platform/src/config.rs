@@ -172,7 +172,7 @@ impl ConfigurationManager {
         // Select the target slot by comparing actual flash contents, not by
         // relying on the cached generation. The slot with the lower generation
         // (or the primary slot when both are empty) is the inactive slot.
-        let target = self.select_inactive_slot(flash, &key, layout)?;
+        let target = self.select_inactive_slot(flash, layout)?;
         let mut payload = [0u8; MAX_PAYLOAD_SIZE];
         let payload_len = encode_payload(&mut payload, board.id, device, app)?;
         let mut header = [0u8; HEADER_SIZE];
@@ -252,7 +252,6 @@ impl ConfigurationManager {
     fn select_inactive_slot(
         &self,
         flash: &mut dyn FlashStorageProvider,
-        _key: &[u8; CONFIG_AEAD_KEY_SIZE],
         layout: ConfigStorageLayout,
     ) -> Result<u32, ConfigurationError> {
         let primary_gen = Self::read_slot_generation(flash, layout.primary_offset)?;

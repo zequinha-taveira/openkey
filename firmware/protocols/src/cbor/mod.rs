@@ -141,7 +141,7 @@ mod tests {
 
         let mut dec = CborDecoder::new(encoded_bytes);
         let mut count = 0;
-        dec.decode_map_canonical(|entry_dec| {
+        dec.decode_map_canonical(0, |entry_dec| {
             count += 1;
             let key = entry_dec.decode_value().unwrap();
             let val = entry_dec.decode_value().unwrap();
@@ -184,9 +184,9 @@ mod tests {
         enc.encode_str("one").unwrap();
 
         let mut dec = CborDecoder::new(enc.written_slice());
-        let res = dec.decode_map_canonical(|entry_dec| {
-            entry_dec.skip_value()?;
-            entry_dec.skip_value()?;
+        let res = dec.decode_map_canonical(0, |entry_dec| {
+            entry_dec.skip_value(0)?;
+            entry_dec.skip_value(0)?;
             Ok(())
         });
 
@@ -205,9 +205,9 @@ mod tests {
         enc.encode_str("second").unwrap();
 
         let mut dec = CborDecoder::new(enc.written_slice());
-        let res = dec.decode_map_canonical(|entry_dec| {
-            entry_dec.skip_value()?;
-            entry_dec.skip_value()?;
+        let res = dec.decode_map_canonical(0, |entry_dec| {
+            entry_dec.skip_value(0)?;
+            entry_dec.skip_value(0)?;
             Ok(())
         });
 
@@ -220,5 +220,21 @@ mod tests {
         let mut dec = CborDecoder::new(&buf);
         assert_eq!(dec.decode_unsigned().unwrap(), 5);
         assert_eq!(dec.finish(), Err(CborError::TrailingBytes));
+    }
+
+    #[test]
+    fn test_depth_limit_exceeded() {
+        // Arrays aninhados de 1 elemento, com um inteiro 0 no centro.
+        // 33 níveis de aninhamento excedem o limite (MAX_CBOR_DEPTH = 32)
+        let mut over_buf = [0x81u8; 34];
+        over_buf[33] = 0x00;
+        let mut dec = CborDecoder::new(&over_buf);
+        assert_eq!(dec.skip_value(0), Err(CborError::DepthLimitExceeded));
+
+        // 32 níveis estão dentro do limite
+        let mut within_buf = [0x81u8; 33];
+        within_buf[32] = 0x00;
+        let mut dec = CborDecoder::new(&within_buf);
+        assert_eq!(dec.skip_value(0), Ok(()));
     }
 }

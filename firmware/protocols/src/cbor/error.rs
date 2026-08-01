@@ -25,6 +25,8 @@ pub enum CborError {
     StringNotUtf8,
     /// Buffer de saída pequeno demais para codificar o valor
     BufferTooSmall,
+    /// Comprimento (de campo/valor) inválido — excede o limite representável
+    InvalidLength,
     /// Tamanho indefinido (*indefinite length*) não permitido em CBOR canônico
     IndefiniteLengthDisallowed,
 }
@@ -42,6 +44,7 @@ impl fmt::Display for CborError {
             Self::UnsupportedSimpleValue(v) => write!(f, "CBOR: Valor simples não suportado {}", v),
             Self::StringNotUtf8 => write!(f, "CBOR: String com UTF-8 inválido"),
             Self::BufferTooSmall => write!(f, "CBOR: Buffer de saída insuficiente"),
+            Self::InvalidLength => write!(f, "CBOR: Comprimento inválido"),
             Self::IndefiniteLengthDisallowed => write!(f, "CBOR: Tamanho indefinido não permitido"),
         }
     }

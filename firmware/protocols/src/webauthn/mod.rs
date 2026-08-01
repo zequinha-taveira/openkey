@@ -60,6 +60,11 @@ impl<'a> AuthenticatorData<'a> {
         // 4. Attested Credential Data (se presente)
         if let Some(ref att) = self.attested_credential_data {
             let cred_id_len = att.credential_id.len();
+            // O campo credentialIdLength possui 2 bytes (WebAuthn limita credId a 1023 bytes);
+            // valide antes do cast para evitar truncamento de `cred_id_len as u16`.
+            if cred_id_len > u16::MAX as usize {
+                return Err(crate::cbor::CborError::InvalidLength);
+            }
             let total_needed = pos + 16 + 2 + cred_id_len + att.credential_public_key.len();
             if out_buf.len() < total_needed {
                 return Err(crate::cbor::CborError::BufferTooSmall);
@@ -144,6 +149,27 @@ mod tests {
     }
 
     #[test]
+    fn test_auth_data_serialization_rejects_oversized_credential_id() {
+        let oversized_cred_id = [0x00u8; u16::MAX as usize + 1];
+        let auth_data = AuthenticatorData {
+            rp_id_hash: [0xaa; 32],
+            flags: WEBAUTHN_FLAG_UP | WEBAUTHN_FLAG_AT,
+            sign_count: 42,
+            attested_credential_data: Some(AttestedCredentialData {
+                aaguid: [0xbb; 16],
+                credential_id: &oversized_cred_id,
+                credential_public_key: &[0xcc; 8],
+            }),
+        };
+
+        let mut buf = [0u8; 65536];
+        assert_eq!(
+            auth_data.serialize(&mut buf),
+            Err(crate::cbor::CborError::InvalidLength)
+        );
+    }
+
+    #[test]
     fn test_encode_p256_cose_key() {
         let x = [0x11; 32];
         let y = [0x22; 32];
@@ -152,9 +178,9 @@ mod tests {
 
         assert!(len > 0);
         let mut dec = crate::cbor::CborDecoder::new(&buf[..len]);
-        dec.decode_map_canonical(|entry_dec| {
-            entry_dec.skip_value()?;
-            entry_dec.skip_value()?;
+        dec.decode_map_canonical(0, |entry_dec| {
+            entry_dec.skip_value(0)?;
+            entry_dec.skip_value(0)?;
             Ok(())
         })
         .unwrap();
