@@ -288,7 +288,7 @@ impl<'a> SecureBootProvider for SecureBootManager<'a> {
         &mut self,
         flash: &mut dyn FlashStorageProvider,
         offset: u32,
-        _size: u32,
+        size: u32,
     ) -> Result<(), BootError> {
         // Lê o header da assinatura
         let mut header = [0u8; SIGNATURE_HEADER_SIZE];
@@ -296,6 +296,11 @@ impl<'a> SecureBootProvider for SecureBootManager<'a> {
 
         // Verifica magic number
         if header[MAGIC_OFFSET..MAGIC_OFFSET + 4] != IMAGE_MAGIC {
+            return Err(BootError::CorruptedImage);
+        }
+
+        // Valida o tamanho informado contra o limite do bank
+        if size == 0 || size > self.layout.bank_size {
             return Err(BootError::CorruptedImage);
         }
 
@@ -317,8 +322,12 @@ impl<'a> SecureBootProvider for SecureBootManager<'a> {
             .copy_from_slice(&header[SIGNATURE_OFFSET..SIGNATURE_OFFSET + P256_SIGNATURE_SIZE]);
 
         // Calcula o hash da imagem (excluindo o header de assinatura)
+        // O tamanho do header não é confiável: limita-se ao `size` já
+        // validado contra `bank_size` para evitar leitura excessiva
         let image_data_offset = offset + SIGNATURE_HEADER_SIZE as u32;
-        let image_data_size = header_size.saturating_sub(SIGNATURE_HEADER_SIZE as u32);
+        let image_data_size = header_size
+            .min(size)
+            .saturating_sub(SIGNATURE_HEADER_SIZE as u32);
         let computed_hash = self.hash_image(flash, image_data_offset, image_data_size)?;
 
         // Verifica se o hash calculado corresponde ao hash armazenado
@@ -355,8 +364,8 @@ impl<'a> SecureBootProvider for SecureBootManager<'a> {
         let mut size_bytes = [0u8; 4];
         flash.read(offset + IMAGE_SIZE_OFFSET as u32, &mut size_bytes)?;
         let size = u32::from_le_bytes(size_bytes);
-        if size == 0 || size > 0x100000 {
-            // Tamanho inválido (0 ou > 1MB)
+        if size == 0 || size > self.layout.bank_size {
+            // Tamanho inválido (0 ou maior que o bank)
             return Err(BootError::CorruptedImage);
         }
         Ok(size)
@@ -507,6 +516,45 @@ mod tests {
         // Escreve tamanho da imagem (1024 bytes)
         flash.data[4..8].copy_from_slice(&1024u32.to_le_bytes());
         assert_eq!(boot.image_size(&mut flash, 0).unwrap(), 1024);
+    }
+
+    #[test]
+    fn test_image_size_rejects_size_above_bank_size() {
+        let mut flash = MockFlash::new();
+        let key_provider = TestKeyProvider;
+        let layout = DualBankLayout {
+            bank_a_offset: 0,
+            bank_b_offset: 4096,
+            bank_size: 4096,
+        };
+        let mut boot = SecureBootManager::new(&key_provider, layout);
+
+        // Tamanho acima do limite do bank (anteriormente aceito até 1 MiB)
+        flash.data[4..8].copy_from_slice(&8192u32.to_le_bytes());
+        assert_eq!(
+            boot.image_size(&mut flash, 0),
+            Err(BootError::CorruptedImage)
+        );
+    }
+
+    #[test]
+    fn test_verify_image_rejects_size_above_bank_size() {
+        let mut flash = MockFlash::new();
+        let key_provider = TestKeyProvider;
+        let layout = DualBankLayout {
+            bank_a_offset: 0,
+            bank_b_offset: 4096,
+            bank_size: 4096,
+        };
+        let mut boot = SecureBootManager::new(&key_provider, layout);
+
+        flash.data[0..4].copy_from_slice(&IMAGE_MAGIC);
+        // Header corrompido com tamanho máximo e `size` informado acima do bank
+        flash.data[4..8].copy_from_slice(&u32::MAX.to_le_bytes());
+        assert_eq!(
+            boot.verify_image(&mut flash, 0, 8192),
+            Err(BootError::CorruptedImage)
+        );
     }
 
     #[test]

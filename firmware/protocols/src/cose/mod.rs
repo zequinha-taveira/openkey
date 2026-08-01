@@ -132,7 +132,7 @@ pub fn parse_cose_sign1<'a>(cbor_bytes: &'a [u8]) -> Result<CoseSign1<'a>> {
     let algorithm = algorithm.ok_or(CborError::UnsupportedSimpleValue(0))?;
 
     // 2. Unprotected header (map - ignorado / deve ser lido)
-    dec.skip_value()?;
+    dec.skip_value(0)?;
 
     // 3. Payload (bstr)
     let payload = dec.decode_bytes()?;

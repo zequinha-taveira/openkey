@@ -83,7 +83,7 @@ fn test_end_to_end_ctaphid_ctap2_getinfo_flow() {
     // 4. Decodificar o mapa CBOR retornado no Host
     let mut dec = CborDecoder::new(&host_rx_buf[1..h_len]);
     let mut key_count = 0;
-    dec.decode_map_canonical(|entry_dec| {
+    dec.decode_map_canonical(0, |entry_dec| {
         key_count += 1;
         let _key = entry_dec.decode_value().unwrap();
         let _val = entry_dec.skip_value_slice().unwrap();
