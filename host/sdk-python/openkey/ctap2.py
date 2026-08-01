@@ -54,6 +54,14 @@ class Ctap2Client:
 
         return response_bytes[1:]
 
+    def _call_raw(self, ctap_cmd: int, payload_data: Optional[Dict[int, Any]] = None) -> bytes:
+        """Envia um comando CTAP2 e retorna o payload CBOR da resposta.
+
+        Diferente de ``_call``, não exige que o payload seja CBOR; retorna os
+        bytes após o byte de status.
+        """
+        return self._call(ctap_cmd, payload_data)
+
     def get_info(self) -> GetInfoResponse:
         """Executa authenticatorGetInfo (0x04)"""
         cbor_response = self._call(CMD_GET_INFO, None)

@@ -64,9 +64,15 @@ O backend de transporte implementa o contrato `send_cmd(cid, cmd, payload)`:
 - `open_device(vid, pid, serial_number, path)` - Abre e inicializa um dispositivo
 - `get_info()` - Informações do autenticador (`authenticatorGetInfo`)
 - `reset()` - Reset de fábrica
+- `setup_pin(ctap2, pin, protocol_version)` - Define o PIN (key agreement + setPIN)
+- `change_device_pin(ctap2, current_pin, new_pin, protocol_version)` - Altera o PIN
+- `PinClient` - Cliente de alto nível (get_pin_retries, set_pin, change_pin, get_pin_token)
 - `make_credential()` - Cria nova credencial (planejado, Fase 10)
 - `get_assertion()` - Autenticação (planejado, Fase 10)
-- `set_pin()` / `change_pin()` - Gestão de PIN (planejado, Fase 10)
+
+> Protocolo PIN: `authenticatorClientPIN` (CTAP2.1 §6.5) com pinUvAuthProtocol
+> v1 e v2 (ECDH P-256, AES-256-CBC, HMAC-SHA-256). O `pinUvAuthToken` derivado
+> é efêmero e nunca é logado ou persistido.
 
 > Os métodos marcados como "planejado" são gaps do SDK a serem implementados na
-> Fase 10 (ver `TASKS.md` G10-T02 a G10-T05).
+> Fase 10 (ver `TASKS.md` G10-T03 a G10-T05).

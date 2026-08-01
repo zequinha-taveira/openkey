@@ -5,8 +5,12 @@ FIDO2 via USB HID.
 
 ## Recursos
 
-- API Python para operações CTAP2 (`GetInfo`, `Reset`; `MakeCredential`,
-  `GetAssertion`, `ClientPin` e `CredentialManagement` planejados na Fase 10).
+- API Python para operações CTAP2 (`GetInfo`, `Reset`, `ClientPin`/PIN;
+  `MakeCredential`, `GetAssertion` e `CredentialManagement` planejados na
+  Fase 10).
+- Protocolo `authenticatorClientPIN` (pinUvAuthProtocol v1 e v2) com ECDH
+  P-256, AES-256-CBC e HMAC-SHA-256 (`setup_pin`, `change_device_pin`,
+  `PinClient`).
 - Transporte USB HID real via `hidapi` (`OpenKeyDevice.from_hid()`,
   `discover_devices()`, `open_device()`).
 - Descoberta de dispositivos com filtro por VID/PID/número de série.

@@ -34,7 +34,7 @@ headless) + `ui/` (PySide6). Depende de gaps do `host/sdk-python`.
 
 - [ ] **G10-T01**: Criar ADR-0013 (framework GUI + resolução de layout) e atualizar documentação
 - [x] **G10-T02**: SDK — backend USB HID (hidapi) + descoberta de dispositivos + testes
-- [ ] **G10-T03**: SDK — protocolo ClientPIN (set_pin, change_pin, get_pin_token) + testes
+- [x] **G10-T03**: SDK — protocolo ClientPIN (set_pin, change_pin, get_pin_token) + testes
 - [ ] **G10-T04**: SDK — CredentialManagement (enumerate_rps, enumerate_credentials, delete_credential) + testes
 - [ ] **G10-T05**: SDK — make_credential / get_assertion + hook de logging de pacotes CTAP + testes
 - [ ] **G10-T06**: Scaffold da GUI — pyproject, bootstrap, MainWindow/navegação, core/models.py + DeviceController + testes
