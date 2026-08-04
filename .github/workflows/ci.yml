@@ -67,3 +67,23 @@ jobs:
           cargo +nightly miri test -p openkey-crypto -p openkey-storage -p openkey-platform -p openkey-boot -p openkey-core 2>&1 || true
           # Miri is informational — codebase currently has zero unsafe blocks
           echo "Miri check completed"
+
+  host-python:
+    name: Host Python (SDK, Diagnostics, CLI, GUI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install monorepo Python packages
+        run: pip install -r requirements-dev.txt
+
+      - name: Run Host Python Tests (headless)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest host/sdk-python host/diagnostics host/gui host/cli host/provisioner -q
