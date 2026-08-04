@@ -1,0 +1,11 @@
+{
+  "name": "openkey",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenKey — Universal open-source FIDO2/WebAuthn security key framework (Rust firmware, host SDK, and documentation). This package.json only wires up preview/dev/build commands for the Freebuff platform; there are no runtime dependencies.",
+  "scripts": {
+    "dev": "bunx serve -l tcp://0.0.0.0:${PORT:-8080} docs",
+    "build": "sh ./scripts/stage-docs.sh",
+    "test": "cargo test --workspace"
+  }
+}
