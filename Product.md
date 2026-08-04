@@ -4,6 +4,8 @@
 **Status:** Aprovado  
 **Licença:** Open Source (Apache 2.0 / MIT Dual License)
 
+> OpenKey é um **framework open-source universal** para chaves de segurança FIDO2/WebAuthn, desenvolvido em Rust para garantir segurança de memória e robustez criptográfica. Atualmente na **versão 1.0.0 (estável)**. O OpenKey é um projeto de software — não possui nem exige uma placa própria (PCB). Utiliza placas de desenvolvimento existentes como plataformas de execução.
+
 ---
 
 ## 🎯 1. Visão do Produto
