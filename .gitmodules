@@ -5,7 +5,7 @@
 
 [submodule "third_party/fido-conformance"]
 	path = third_party/fido-conformance
-	url = https://github.com/fido-alliance/conformance-test-tools.git
+	url = https://github.com/fido-alliance/conformance-test-tools-resources.git
 	branch = main
 
 [submodule "third_party/nrf-hal"]

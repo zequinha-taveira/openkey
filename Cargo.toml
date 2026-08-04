@@ -1,16 +1,16 @@
 [workspace]
 resolver = "2"
 members = [
-    "firmware/core",
+    "protocol/core",
+    "protocol/protocols",
     "firmware/platform",
-    "firmware/protocols",
     "firmware/storage",
     "firmware/crypto",
     "firmware/usb",
     "firmware/config",
     "firmware/boot",
     "firmware/platform/mcu/rp23xx",
-    "tools/simulator",
+    "simulator",
 ]
 
 [workspace.package]
@@ -21,9 +21,9 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/openkey/openkey"
 
 [workspace.dependencies]
-openkey-core = { path = "firmware/core" }
+openkey-core = { path = "protocol/core" }
 openkey-platform = { path = "firmware/platform" }
-openkey-protocols = { path = "firmware/protocols" }
+openkey-protocols = { path = "protocol/protocols" }
 openkey-storage = { path = "firmware/storage" }
 openkey-crypto = { path = "firmware/crypto" }
 openkey-usb = { path = "firmware/usb" }
