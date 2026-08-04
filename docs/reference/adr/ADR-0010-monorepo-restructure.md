@@ -27,16 +27,18 @@ Adotar o seguinte layout estruturado para o monorepo:
 
 ```
 openkey/
+├── protocol/        # Núcleo do protocolo (no_std, independente de MCU)
+│   ├── core/        # Engine de segurança e CTAP2 (openkey-core)
+│   └── protocols/   # CBOR, COSE, CTAP-HID, CTAP2, WebAuthn (openkey-protocols)
 ├── firmware/        # Todo código embarcado (no_std)
-│   ├── core/
 │   ├── platform/
 │   │   └── mcu/    # Implementações por MCU
-│   ├── protocols/
 │   ├── storage/
 │   ├── crypto/
-│   ├── usb/         # NOVO
-│   ├── config/      # NOVO
-│   └── boot/        # NOVO
+│   ├── usb/
+│   ├── config/
+│   └── boot/
+├── simulator/       # Simulador de software (openkey-simulator)
 ├── boards/          # Apenas perfis YAML (sem código Rust)
 │   ├── profiles/
 │   ├── templates/
@@ -45,23 +47,22 @@ openkey/
 │   ├── sdk-python/  # (era sdk/)
 │   ├── cli/
 │   ├── configurator/ # (era gui/)
-│   ├── provisioner/ # NOVO
-│   ├── updater/     # NOVO
-│   └── diagnostics/ # NOVO
+│   ├── provisioner/
+│   ├── updater/
+│   └── diagnostics/
 ├── tools/           # Ferramentas internas
 │   ├── manufacturing/
 │   ├── migration/
 │   ├── scripts/
-│   ├── generators/
-│   └── simulator/   # (era host/simulator/)
+│   └── generators/
 ├── tests/           # Testes por objetivo
 │   ├── unit/
 │   ├── integration/ # (era host/tests/)
 │   ├── interoperability/
 │   ├── hardware/
 │   └── regression/
-├── cmake/           # NOVO
-└── packaging/       # NOVO
+├── cmake/
+└── packaging/
 ```
 
 ### Principais mudanças
@@ -70,17 +71,24 @@ openkey/
 2. **`boards/`**: Convertido de crate Rust para repositório de perfis YAML puros.
 3. **`host/sdk/` → `host/sdk-python/`**: Nome explicita a linguagem alvo.
 4. **`host/gui/` → `host/configurator/`**: Nome descreve responsabilidade, não tecnologia.
-5. **`host/simulator/` → `tools/simulator/`**: O simulador é uma ferramenta de desenvolvimento, não um produto host.
+5. **`host/simulator/` → `simulator/`**: O simulador é uma ferramenta de desenvolvimento, não um produto host. *(Emenda 2026-08-04: promovido de `tools/simulator/` para a raiz do monorepo.)*
 6. **`host/tests/` → `tests/integration/`**: Testes migram para a suíte centralizada `tests/`.
 7. **Novos crates firmware**: `usb/`, `config/`, `boot/` — separação de responsabilidades no firmware.
 8. **Novos diretórios host**: `provisioner/`, `updater/`, `diagnostics/`.
 9. **`cmake/` e `packaging/`**: Infraestrutura de build e distribuição.
+
+### Emenda (2026-08-04) — Separação protocol / firmware / simulador
+
+10. **Novo `protocol/`**: O núcleo do protocolo (`openkey-core` e `openkey-protocols`) sai de `firmware/` para `protocol/`, separando código de protocolo (independente de MCU) do firmware embarcado.
+11. **`tools/simulator/` → `simulator/`**: O simulador é promovido a diretório raiz, reforçando a separação em cinco áreas: núcleo do protocolo, firmware Rust, simulador, testes e ferramentas.
+12. **`firmware/`**: Passa a conter exclusivamente firmware embarcado (`platform/`, `storage/`, `crypto/`, `usb/`, `config/`, `boot/`).
 
 ## Consequências
 
 ### Positivas
 
 - **Clareza de propósito**: `firmware/` contém exclusivamente código embarcado.
+- **Separação protocol/firmware**: O núcleo do protocolo é reutilizável e testável independentemente de MCU.
 - **Escalabilidade**: Novos MCUs adicionam apenas `firmware/platform/mcu/<novo>/`.
 - **Boards como dados**: Perfis YAML são editáveis sem recompilar.
 - **Testes centralizados**: `tests/` unifica todos os objetivos de teste.

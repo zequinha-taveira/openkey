@@ -83,35 +83,35 @@
 
 - [x] **PROTO-001**: Implementar CBOR parser/serializer canônico
   - Sub-tasks:
-    - [x] Implementar parser CBOR estático (sem alocação heap) em `firmware/protocols/src/cbor/decoder.rs`
-    - [x] Implementar validação de canonicidade (RFC 8949) em `firmware/protocols/src/cbor/`
+    - [x] Implementar parser CBOR estático (sem alocação heap) em `protocol/protocols/src/cbor/decoder.rs`
+    - [x] Implementar validação de canonicidade (RFC 8949) em `protocol/protocols/src/cbor/`
     - [x] Adicionar testes unitários e de borda para validação canônica
 
 - [x] **PROTO-002**: Implementar COSE
   - Sub-tasks:
-    - [x] Implementar estrutura COSE Sign1 (RFC 9052) em `firmware/protocols/src/cose/mod.rs`
+    - [x] Implementar estrutura COSE Sign1 (RFC 9052) em `protocol/protocols/src/cose/mod.rs`
     - [x] Integrar com crypto (ECDSA P-256 / Ed25519) e Sig_structure
     - [x] Adicionar testes de encodagem e parsing roundtrip
 
 - [x] **PROTO-003**: Implementar CTAP HID
   - Sub-tasks:
-    - [x] Implementar framing CTAPHID (conforme ADR-0003) em `firmware/protocols/src/ctap_hid/mod.rs`
+    - [x] Implementar framing CTAPHID (conforme ADR-0003) em `protocol/protocols/src/ctap_hid/mod.rs`
     - [x] Implementar gerenciamento de canais e sequenciamento de pacotes
     - [x] Implementar comandos: INIT, PING, MSG, CANCEL, ERROR
     - [x] Adicionar reassembly e testes de mensagens multi-pacote
 
 - [x] **PROTO-004**: Implementar CTAP2
   - Sub-tasks:
-    - [x] Implementar `authenticatorGetInfo` em `firmware/protocols/src/ctap2/get_info.rs`
-    - [x] Implementar estruturas de resposta e códigos de status em `firmware/protocols/src/ctap2/status.rs`
-    - [x] Implementar engine de comandos `Ctap2Engine` em `firmware/protocols/src/ctap2/mod.rs`
+    - [x] Implementar `authenticatorGetInfo` em `protocol/protocols/src/ctap2/get_info.rs`
+    - [x] Implementar estruturas de resposta e códigos de status em `protocol/protocols/src/ctap2/status.rs`
+    - [x] Implementar engine de comandos `Ctap2Engine` em `protocol/protocols/src/ctap2/mod.rs`
 
 - [x] **PROTO-005**: Implementar WebAuthn
   - Sub-tasks:
     - [x] Implementar serialização de `AuthenticatorData` (`authData`)
     - [x] Implementar codificação de `PublicKeyCredential` (COSE Key P-256)
     - [x] Implementar suporte a `rpIdHash` e flags (`UP`, `UV`, `AT`)
-    - [x] Adicionar testes unitários em `firmware/protocols/src/webauthn/mod.rs`
+    - [x] Adicionar testes unitários em `protocol/protocols/src/webauthn/mod.rs`
 
 ---
 
@@ -156,7 +156,7 @@
 
 - [x] **VAL-001**: Testes unitários (55 testes unitários em 11 crates do workspace Rust passando)
 - [x] **VAL-002**: Testes de integração (`tests/integration_test.rs` validando fluxo CTAPHID -> CBOR -> CTAP2 Engine)
-- [x] **VAL-003**: Testes de hardware (`tools/simulator` e compilação `no_std` para o target RP2350)
+- [x] **VAL-003**: Testes de hardware (`simulator` e compilação `no_std` para o target RP2350)
 - [x] **VAL-004**: Testes de interoperabilidade (Conformidade WebAuthn `authData`, COSE Key P-256 e CBOR canônico)
 - [x] **VAL-005**: Testes de regressão (Resiliência de storage em falhas de escrita e saúde contínua do TRNG SP 800-90B)
 
