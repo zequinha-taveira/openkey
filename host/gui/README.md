@@ -29,16 +29,17 @@ openkey_manager/
 
 ## Instalação (dev)
 
+Na raiz do monorepo, instale os pacotes locais na ordem de dependência:
+
 ```bash
-pip install -e ".[dev]"
+pip install -r requirements-dev.txt
 ```
 
-O pacote depende do `openkey-sdk` (caminho `host/sdk-python`); para desenvolver
-sem instalar, use:
-
-```powershell
-$env:PYTHONPATH = "C:\openkey\host\sdk-python;C:\openkey\host\gui"
-```
+O pacote depende do `openkey-sdk` (caminho `host/sdk-python`) e do
+`openkey-diagnostics` (caminho `host/diagnostics`) — ambos instalados como
+pacotes locais (editable) pelo `requirements-dev.txt`, pois ainda não são
+publicados no PyPI. Instalar apenas `pip install -e ".[dev]"` em `host/gui`
+falharia enquanto essas dependências não forem publicadas.
 
 ## Execução
 
@@ -48,8 +49,7 @@ python -m openkey_manager
 
 ## Testes (headless)
 
-```powershell
-$env:PYTHONPATH = "C:\openkey\host\sdk-python;C:\openkey\host\gui"
+```bash
 python -m pytest host/gui -q
 ```
 

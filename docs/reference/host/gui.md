@@ -101,11 +101,24 @@ sem Qt/SDK). As verificações são executadas sobre um *adapter* duck-typed:
   passou/falhou, versão de firmware e marca temporal. Ativada apenas com
   dispositivo conectado.
 
+## Instalação (dev)
+
+Na raiz do monorepo, instale os pacotes locais na ordem de dependência:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+O `requirements-dev.txt` instala `openkey-sdk`, `openkey-diagnostics` e
+`openkey-manager` em modo *editable* — como `openkey-sdk` e
+`openkey-diagnostics` ainda não são publicados no PyPI, o `openkey-manager` os
+consome como dependências locais deste monorepo (instalar `host/gui` isolado
+falharia enquanto essas dependências não forem publicadas).
+
 ## Testes (headless)
 
-```powershell
-$env:PYTHONPATH = "C:\openkey\host\sdk-python;C:\openkey\host\gui;C:\openkey\host\diagnostics"
-python -m pytest host/sdk-python host/gui host/diagnostics -q
+```bash
+python -m pytest host/sdk-python host/diagnostics host/gui host/cli host/provisioner -q
 ```
 
 O `tests/conftest.py` força `QT_QPA_PLATFORM=offscreen`, permitindo execução na

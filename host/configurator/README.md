@@ -8,4 +8,7 @@ para gerenciamento e configuração de chaves OpenKey:
 - Provisionamento de Board Profile e Device Profile.
 - Visualização de logs e diagnósticos.
 
-Documentação técnica em [`docs/api/configurator.md`](../../docs/api/).
+Documentação técnica em [`docs/reference/host/configurator.md`](../../docs/reference/host/configurator.md).
+
+Requer o pacote `openkey-sdk` (caminho `host/sdk-python`); instale as dependências
+do monorepo com `pip install -r requirements-dev.txt` (raiz).
