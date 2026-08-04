@@ -18,6 +18,7 @@ Este diretório contém todos os Registros de Decisão de Arquitetura (ADRs) do 
 | [ADR-0010](ADR-0010-monorepo-restructure.md) | Reestruturação do Layout do Monorepo OpenKey | Aceito | 2026-07-27 |
 | [ADR-0011](ADR-0011-device-configuration-persistence.md) | Persistência A/B de Configuração de Dispositivo | Aceito | 2026-07-27 |
 | [ADR-0012](ADR-0012-config-aead-boundary.md) | Limite Crypto/Platform para Configuração Autenticada | Aceito | 2026-07-27 |
+| [ADR-0013](ADR-0013-gui-framework.md) | Framework GUI e Estrutura do OpenKey Manager Desktop | Proposto | 2026-07-31 |
 
 ---
 
