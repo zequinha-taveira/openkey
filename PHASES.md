@@ -244,6 +244,45 @@ Preparar a primeira versão estável.
 
 ---
 
+# Fase 10 — Desktop GUI (OpenKey Manager)
+
+> **Nota:** As fases PAR-01 a PAR-08 estão concluídas (v1.0.0). As próximas
+> fases seguem o `Development Plan.md` (Fase 9 já coberta em PAR-06; esta é a
+> **Fase 10**).
+
+## Objetivo
+
+Criar o **OpenKey Manager**, aplicação desktop gráfica multiplataforma
+(Windows, macOS, Linux) para gerenciamento de credenciais residentes, PIN,
+diagnóstico e atualização de firmware com assistente visual.
+
+### Entradas
+
+* `Development Plan.md` (Fase 10)
+* `Ecosystem.md` §4 (OpenKey Manager)
+* `Product.md`
+* ADR-0013 (Framework GUI e Estrutura)
+* `host/sdk-python` (OpenKeyDevice)
+
+### Entregáveis
+
+* Aplicação desktop `host/gui/` (OpenKey Manager) em PySide6
+* Camada `core/` desacoplada de Qt (testável headless)
+* Páginas: dispositivo, credenciais, PIN, diagnósticos, update wizard, logs, interop
+* Gaps do SDK implementados (HID real, ClientPIN, CredentialManagement)
+* Job Python na CI (matrix Ubuntu/Windows/macOS)
+* Instaladores nativos em `packaging/`
+* Documentação de API e usuário
+
+### Gate
+
+* [ ] GUI funcional nas 3 plataformas
+* [ ] Testes headless passando na CI
+* [ ] Credenciais residentes, PIN e update wizard operacionais
+* [ ] Documentação atualizada
+
+---
+
 # Regra Geral
 
 Uma fase somente pode iniciar quando:
