@@ -1,0 +1,34 @@
+# OpenKey Custom Hardware (RP2350)
+# Para PCBs que integram o firmware OpenKey com VID/PID do pid.codes.
+
+board:
+  id: OPENKEY_CUSTOM_RP2350
+  manufacturer: "OpenKey Community"
+  model: "OpenKey Custom Board"
+  revision: "1.0"
+
+flash:
+  total_size: 4096          # ajustar conforme o chip
+  page_size: 256
+  sector_size: 4096
+
+usb:
+  vid: 0x1209               # pid.codes VID
+  pid: 0x4F4B               # pid.codes PID (OpenKey "OK")
+  bcd_version: "0x0100"     # USB 1.0
+  max_packet_size: 64
+
+led:
+  pin: 25                   # ajustar conforme PCB
+  active_high: true
+
+button:
+  pin: 7                    # ajustar conforme PCB
+  active_low: true
+  pull_up: true
+
+features:
+  has_nfc: false
+  has_ble: false
+  has_secure_element: false
+  has_tamper_detect: false
