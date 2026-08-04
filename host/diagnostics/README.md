@@ -24,8 +24,8 @@ host/diagnostics/
 
 Testes:
 
-```powershell
-$env:PYTHONPATH = "C:\openkey\host\diagnostics"
+```bash
+pip install -r requirements-dev.txt   # na raiz do monorepo (instala o pacote em modo editable)
 python -m pytest host/diagnostics -q
 ```
 

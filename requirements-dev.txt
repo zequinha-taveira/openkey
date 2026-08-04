@@ -1,0 +1,14 @@
+# OpenKey — Dependências Python de desenvolvimento (monorepo)
+# Instala os pacotes locais na ordem de dependência. Uso:
+#   pip install -r requirements-dev.txt
+#
+# Nota: openkey-sdk e openkey-diagnostics ainda não são publicados no PyPI;
+# por isso os demais pacotes os consomem como dependências locais (editable)
+# deste monorepo.
+
+-e ./host/sdk-python[dev]
+-e ./host/diagnostics[dev]
+-e ./host/cli
+-e ./host/configurator
+-e ./host/provisioner
+-e ./host/gui[dev]

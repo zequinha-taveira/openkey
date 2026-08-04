@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openkey-configurator"
+version = "0.1.0"
+description = "OpenKey Configurator - gerenciamento e configuração visual de chaves OpenKey"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT OR Apache-2.0" }
+dependencies = ["openkey-sdk>=0.6.0"]
+
+[project.scripts]
+openkey-configurator = "configurator:main"
+
+[tool.setuptools]
+py-modules = ["configurator"]

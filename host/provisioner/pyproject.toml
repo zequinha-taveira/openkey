@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openkey-provisioner"
+version = "0.1.0"
+description = "OpenKey Provisioner - provisionamento de fábrica de chaves OpenKey"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT OR Apache-2.0" }
+dependencies = ["openkey-sdk>=0.6.0"]
+
+[project.scripts]
+openkey-provisioner = "provisioner:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools]
+py-modules = ["provisioner"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

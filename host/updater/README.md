@@ -7,4 +7,4 @@ Ferramenta de atualização segura de firmware (DFU) para chaves OpenKey:
 - Realiza rollback automático em caso de falha.
 - Compatível com Windows, Linux e macOS.
 
-Consulte [`docs/how-to/firmware-update.md`](../../docs/how-to/) para instruções.
+Consulte [`docs/how-to/update-firmware.md`](../../docs/how-to/update-firmware.md) para instruções.

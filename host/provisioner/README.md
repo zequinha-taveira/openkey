@@ -7,4 +7,7 @@ Ferramenta de provisionamento de fábrica para chaves OpenKey:
 - Verifica a integridade do firmware gravado.
 - Suporte a fluxos de produção em lote.
 
-Consulte [`docs/how-to/manufacturing.md`](../../docs/how-to/) para o guia de uso.
+Consulte [`docs/how-to/provision-device.md`](../../docs/how-to/provision-device.md) para o guia de uso.
+
+Requer o pacote `openkey-sdk` (caminho `host/sdk-python`); instale as dependências
+do monorepo com `pip install -r requirements-dev.txt` (raiz).
