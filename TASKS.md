@@ -19,6 +19,41 @@
 | PAR-06 | Host Tools | ✅ Concluída | 100% |
 | PAR-07 | Validation | ✅ Concluída | 100% |
 | PAR-08 | Release | ✅ Concluída | 100% |
+| Fase 10 | Desktop GUI (OpenKey Manager) | 📋 Planejada | 0% |
+
+---
+
+## 🖥️ Fase 10 — Desktop GUI (OpenKey Manager)
+
+Fase do `Development Plan.md` que implementa o **OpenKey Manager**, aplicação
+desktop gráfica multiplataforma (Windows, macOS, Linux). Framework: **PySide6**
+(ADR-0013). Estrutura: `host/gui/` com camada `core/` (sem Qt, testável
+headless) + `ui/` (PySide6). Depende de gaps do `host/sdk-python`.
+
+### Prioridade Alta
+
+- [ ] **G10-T01**: Criar ADR-0013 (framework GUI + resolução de layout) e atualizar documentação
+- [x] **G10-T02**: SDK — backend USB HID (hidapi) + descoberta de dispositivos + testes
+- [x] **G10-T03**: SDK — protocolo ClientPIN (set_pin, change_pin, get_pin_token) + testes
+- [x] **G10-T04**: SDK — CredentialManagement (enumerate_rps, enumerate_credentials, delete_credential) + testes
+- [x] **G10-T05**: SDK — make_credential / get_assertion + hook de logging de pacotes CTAP + testes
+- [x] **G10-T06**: Scaffold da GUI — pyproject, bootstrap, MainWindow/navegação, core/models.py + DeviceController + testes
+- [x] **G10-T07**: Página de dispositivo + descoberta + auto-refresh (attach/detach)
+- [x] **G10-T08**: Página de credenciais residentes (listar/ver/remover) + testes
+- [x] **G10-T09**: Diálogo de PIN (set/change) + padrão de confirmação + testes
+- [x] **G10-T10**: Serviço de diagnósticos (em `host/diagnostics/`) + página + testes
+- [ ] **G10-T11**: Assistente visual de atualização de firmware (reuso FirmwareUpdater) + UpdateService + testes
+
+### Prioridade Média
+
+- [ ] **G10-T12**: Visualizador de logs de eventos e pacotes CTAP (captura via hook)
+- [ ] **G10-T13**: Ferramenta visual de interoperabilidade (smoke make_credential/get_assertion)
+- [ ] **G10-T14**: Fluxo de reset de fábrica com confirmação explícita
+- [ ] **G10-T15**: Job Python na CI (matrix Ubuntu/Windows/macOS, headless)
+
+### Prioridade Baixa
+
+- [ ] **G10-T16**: Instaladores nativos em `packaging/` + README + docs + gate da Fase 10
 
 ---
 
