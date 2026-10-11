@@ -7,3 +7,5 @@ license.workspace = true
 [dependencies]
 openkey-usb = { path = "../crates/openkey-usb" }
 openkey-core = { path = "../crates/openkey-core" }
+openkey-crypto = { path = "../crates/openkey-crypto" }
+openkey-vault = { path = "../crates/openkey-vault" }
