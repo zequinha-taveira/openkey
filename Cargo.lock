@@ -190,6 +190,9 @@ version = "0.1.0"
 [[package]]
 name = "openkey-protocol-fido"
 version = "0.1.0"
+dependencies = [
+ "sha2",
+]
 
 [[package]]
 name = "openkey-simulator"
