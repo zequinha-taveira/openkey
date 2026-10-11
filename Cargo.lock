@@ -191,6 +191,7 @@ version = "0.1.0"
 name = "openkey-protocol-fido"
 version = "0.1.0"
 dependencies = [
+ "openkey-crypto",
  "sha2",
 ]
 
