@@ -28,16 +28,16 @@ Criar a fundação do projeto.
 
 ### Entradas
 
-* Visão do produto (`Product.md`)
-* Especificação técnica (`spec.md`)
-* Plano de desenvolvimento (`Development Plan.md`)
+* Visão do produto (`../explanation/product-overview.md`)
+* Especificação técnica (`../reference/spec.md`)
+* Plano de desenvolvimento (`development-plan.md`)
 
 ### Entregáveis
 
 * Estrutura do monorepo
 * AGENTS.md
-* TASKS.md
-* PHASES.md
+* tasks.md
+* phases.md
 * README.md
 * Arquitetura inicial
 
@@ -58,15 +58,15 @@ Definir toda a arquitetura.
 ### Entradas
 
 * ADRs iniciais (ADR-0001 a ADR-0009)
-* Product.md
-* spec.md
+* ../explanation/product-overview.md
+* ../reference/spec.md
 
 ### Entregáveis
 
 * architecture.md
-* spec.md
-* Product.md
-* Development Plan.md
+* ../reference/spec.md
+* ../explanation/product-overview.md
+* development-plan.md
 * ADRs iniciais
 
 ### Gate
@@ -148,7 +148,7 @@ Implementar protocolos.
 
 ### Entradas
 
-* spec.md (RF-001 a RF-015)
+* ../reference/spec.md (RF-001 a RF-015)
 * ADR-0003 (USB)
 
 ### Entregáveis
@@ -175,7 +175,7 @@ Desenvolver ferramentas para o computador.
 ### Entradas
 
 * ADR-0005 (SDK Architecture)
-* Ecosystem.md
+* ../reference/ecosystem.md
 
 ### Entregáveis
 
@@ -201,7 +201,7 @@ Validar o sistema completo.
 ### Entradas
 
 * Todos os componentes implementados
-* Plano de testes (Development Plan.md)
+* Plano de testes (development-plan.md)
 
 ### Entregáveis
 
@@ -239,7 +239,7 @@ Preparar a primeira versão estável.
 ### Gate
 
 * [x] Release Candidate aprovado (v1.0.0 compilado em modo release e validado)
-* [x] Documentação completa (README.md, CHANGELOG.md, spec.md, VERSION_HISTORY.md sincronizados)
+* [x] Documentação completa (README.md, CHANGELOG.md, ../reference/spec.md, ../reference/version-history.md sincronizados)
 * [x] Tag de versão criada (`v1.0.0`)
 
 ---
@@ -247,7 +247,7 @@ Preparar a primeira versão estável.
 # Fase 10 — Desktop GUI (OpenKey Manager)
 
 > **Nota:** As fases PAR-01 a PAR-08 estão concluídas (v1.0.0). As próximas
-> fases seguem o `Development Plan.md` (Fase 9 já coberta em PAR-06; esta é a
+> fases seguem o `development-plan.md` (Fase 9 já coberta em PAR-06; esta é a
 > **Fase 10**).
 
 ## Objetivo
@@ -258,9 +258,9 @@ diagnóstico e atualização de firmware com assistente visual.
 
 ### Entradas
 
-* `Development Plan.md` (Fase 10)
-* `Ecosystem.md` §4 (OpenKey Manager)
-* `Product.md`
+* `development-plan.md` (Fase 10)
+* `../reference/ecosystem.md` §4 (OpenKey Manager)
+* `../explanation/product-overview.md`
 * ADR-0013 (Framework GUI e Estrutura)
 * `host/sdk-python` (OpenKeyDevice)
 

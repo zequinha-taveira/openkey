@@ -1,7 +1,7 @@
 # OpenKey Manager (`host/gui/`)
 
 Aplicação desktop gráfica multiplataforma (Windows, macOS, Linux) do OpenKey —
-Fase 10 do `Development Plan.md`. Framework: **PySide6** (ver
+Fase 10 do `../../docs/planning/development-plan.md`. Framework: **PySide6** (ver
 [ADR-0013](../../docs/reference/adr/ADR-0013-gui-framework.md)).
 
 ## Funcionalidades planejadas

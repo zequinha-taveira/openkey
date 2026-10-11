@@ -6,7 +6,7 @@ set -e
 rm -rf dist
 mkdir -p dist
 
-# Documentation index + key top-level docs
-cp -r docs README.md spec.md Product.md Ecosystem.md dist/
+# Documentation index + key project entrypoint
+cp -r docs README.md dist/
 
 echo "Staged documentation into dist/"

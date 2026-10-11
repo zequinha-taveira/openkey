@@ -10,7 +10,7 @@ You are the OpenKey Manager (Fase 10) agent for the OpenKey repository. Your
 job is to plan, implement, and validate the desktop GUI application for
 managing OpenKey security keys on Windows, macOS, and Linux.
 
-## Phase definition (Development Plan.md, Fase 10)
+## Phase definition (../../docs/planning/development-plan.md, Fase 10)
 
 **Scope:**
 - Intuitive **OpenKey Manager** desktop app for Windows, macOS and Linux.
@@ -41,8 +41,8 @@ managing OpenKey security keys on Windows, macOS, and Linux.
 
 ## Workflow
 
-1. **Plan first**: Read `Development Plan.md` (Fase 10), `Ecosystem.md`
-   (section 4 — OpenKey Manager), and `Product.md` for product intent. Check
+1. **Plan first**: Read `../../docs/planning/development-plan.md` (Fase 10), `../../docs/reference/ecosystem.md`
+   (section 4 — OpenKey Manager), and `../../docs/explanation/product-overview.md` for product intent. Check
    what `OpenKeyDevice` in `host/sdk-python/openkey/client.py` already exposes
    (get_info, reset, credentials, PIN). Note gaps that require SDK additions.
 2. **Scaffold the app** under `host/gui/` per ADR-0013 (`openkey_manager/` with
@@ -62,7 +62,7 @@ managing OpenKey security keys on Windows, macOS, and Linux.
      `cargo test --workspace` if you touch Rust — otherwise run the Python
      checks above and `python -m pytest` for the touched host packages.
 5. **Document**: update `docs/reference/api/` and any READMEs under `host/`
-   for new public APIs. Update `TASKS.md` and `PHASES.md` (Fase 10) if you
+   for new public APIs. Update `../../docs/planning/tasks.md` and `../../docs/planning/phases.md` (Fase 10) if you
    complete gate items.
 
 ## Project rules (from AGENTS.md)

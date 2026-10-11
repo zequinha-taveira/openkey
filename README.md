@@ -61,11 +61,11 @@ openkey/
 
 ## 📄 Documentos Fundamentais
 
-- 🌐 [Ecosystem.md](Ecosystem.md) — Visão geral e arquitetura do OpenKey Ecosystem.
+- 🌐 [docs/reference/ecosystem.md](docs/reference/ecosystem.md) — Visão geral e arquitetura do OpenKey Ecosystem.
 - 🧭 [Organização prática](docs/development/repository-organization.md) — Inventário real, regras de layout e gate de build.
-- 🎯 [Product.md](Product.md) — Visão do produto, objetivos estratégicos e diferenciais.
-- 🚀 [Development Plan.md](Development%20Plan.md) — Plano de desenvolvimento incremental em 12 fases.
-- 📋 [spec.md](spec.md) — Especificação técnica funcional e não-funcional.
+- 🎯 [docs/explanation/product-overview.md](docs/explanation/product-overview.md) — Visão do produto, objetivos estratégicos e diferenciais.
+- 🚀 [docs/planning/development-plan.md](docs/planning/development-plan.md) — Plano de desenvolvimento incremental em 12 fases.
+- 📋 [docs/reference/spec.md](docs/reference/spec.md) — Especificação técnica funcional e não-funcional.
 
 ## 🔌 Hardware de Referência
 

@@ -35,16 +35,16 @@ A organização deve preservar os caminhos usados pelo workspace Cargo e pelos p
 
 | Categoria | Caminho | Uso |
 |---|---|---|
-| Entrada do projeto | `README.md`, `Ecosystem.md`, `Product.md` | Visão, escopo e links para os detalhes |
+| Entrada do projeto | `README.md`, `../reference/ecosystem.md`, `../explanation/product-overview.md` | Visão, escopo e links para os detalhes |
 | Governança | `CONTRIBUTING.md`, `GOVERNANCE.md`, `SECURITY.md`, `RELEASING.md` | Regras e processos do projeto |
-| Planejamento | `Development Plan.md`, `PHASES.md`, `TASKS.md` | Roadmap, fases e tarefas rastreáveis |
+| Planejamento | `../planning/development-plan.md`, `../planning/phases.md`, `../planning/tasks.md` | Roadmap, fases e tarefas rastreáveis |
 | Tutoriais | `docs/tutorials/` | Aprendizado passo a passo |
 | Procedimentos | `docs/how-to/` | Build, flash, provisionamento e release |
 | Referência | `docs/reference/` | APIs, protocolos, arquitetura e ADRs |
 | Explicação | `docs/explanation/` | Contexto, decisões, segurança e conceitos |
 | Diagramas | `docs/diagrams/` | Fontes editáveis de diagramas |
 
-Os documentos de raiz não são cópias automáticas dos documentos Diátaxis. Eles são pontos de entrada de governança e produto; os documentos em `docs/` contêm os detalhes técnicos. Links canônicos evitam manter o mesmo texto em dois lugares.
+Os arquivos de raiz permanecem reservados aos pontos de entrada do GitHub e à governança. Os documentos de produto, arquitetura e planejamento ficam em `docs/`; links canônicos evitam manter o mesmo texto em dois lugares.
 
 ### Contextos de IA e automação
 
@@ -59,8 +59,8 @@ Essas áreas não fazem parte do workspace Cargo e não devem ser movidas para `
 
 ## 3. Duplicações e inconsistências encontradas
 
-- `Product.md`, `Ecosystem.md` e `Development Plan.md` são documentos estratégicos de raiz; os arquivos em `docs/explanation/` são resumos ou explicações Diátaxis, não cópias byte a byte.
-- `README.md`, `Ecosystem.md` e documentos antigos continham exemplos de caminhos conceituais como `core/`, `platform/`, `host/sdk` e `host/simulator`. Os caminhos implementados são `protocol/core/`, `firmware/platform/`, `host/sdk-python/` e `simulator/`.
+- `docs/explanation/product-overview.md`, `docs/reference/ecosystem.md` e `docs/planning/development-plan.md` são os documentos estratégicos canônicos; os arquivos em `docs/explanation/` são resumos ou explicações Diátaxis, não cópias byte a byte.
+- `README.md`, `../reference/ecosystem.md` e documentos antigos continham exemplos de caminhos conceituais como `core/`, `platform/`, `host/sdk` e `host/simulator`. Os caminhos implementados são `protocol/core/`, `firmware/platform/`, `host/sdk-python/` e `simulator/`.
 - `.context/`, `.claude/` e `.opencode/` têm finalidades diferentes. Não há justificativa segura para fundi-los ou apagar agentes sem confirmar os consumidores.
 - A árvore `legacy/`, as crates paralelas em `crates/` e o diretório `openkey-rs/` não fazem parte do layout canônico e não devem ser reintroduzidos.
 
