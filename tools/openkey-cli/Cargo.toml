@@ -1,0 +1,9 @@
+[package]
+name = "openkey-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "openkey-cli"
+path = "src/main.rs"
