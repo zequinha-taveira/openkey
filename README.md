@@ -62,6 +62,7 @@ openkey/
 ## 📄 Documentos Fundamentais
 
 - 🌐 [docs/reference/ecosystem.md](docs/reference/ecosystem.md) — Visão geral e arquitetura do OpenKey Ecosystem.
+- 🛠️ [Como criar o OpenKey](docs/tutorials/create-openkey.md) — Fluxo prático do simulador à placa de desenvolvimento.
 - 🧭 [Organização prática](docs/development/repository-organization.md) — Inventário real, regras de layout e gate de build.
 - 🎯 [docs/explanation/product-overview.md](docs/explanation/product-overview.md) — Visão do produto, objetivos estratégicos e diferenciais.
 - 🚀 [docs/planning/development-plan.md](docs/planning/development-plan.md) — Plano de desenvolvimento incremental em 12 fases.

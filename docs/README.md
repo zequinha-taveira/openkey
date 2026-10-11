@@ -15,6 +15,7 @@ docs/
 ├── README.md                 # Índice da documentação
 │
 ├── tutorials/                # Aprendizado
+│   ├── create-openkey.md
 │   ├── getting-started.md
 │   ├── first-build.md
 │   ├── first-provisioning.md
@@ -74,6 +75,7 @@ docs/
 Ensinam alguém a aprender. Guiam passo a passo do zero até um resultado funcional.
 
 - [Getting Started](tutorials/getting-started.md)
+- [Como criar e evoluir o OpenKey](tutorials/create-openkey.md)
 - [Primeiro Build](tutorials/first-build.md)
 - [Primeiro Provisionamento](tutorials/first-provisioning.md)
 - [Primeira Chave de Segurança](tutorials/first-security-key.md)
