@@ -1,5 +1,7 @@
 #![no_std]
 
+pub mod cbor;
+
 /// Comandos CTAP2 suportados ou reservados pelo framework.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FidoCommand {
