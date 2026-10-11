@@ -4,6 +4,10 @@ extern crate alloc;
 
 pub mod cbor;
 pub mod cose;
+pub mod credentials;
+pub mod ctap2;
+pub mod ctaphid;
+pub mod webauthn;
 
 /// Comandos CTAP2 suportados ou reservados pelo framework.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
