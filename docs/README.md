@@ -1,12 +1,9 @@
 # Documentação do OpenKey 📖
 
 Bem-vindo ao centro de documentação oficial do monorepo **OpenKey** (Versão Estável `v1.0.0`).
+
 A documentação segue o modelo [Diátaxis](https://diataxis.fr/):
 **Tutorials** → **How-to** → **Reference** → **Explanation**.
-
-> **Layout atual:** o workspace Rust ativo está na raiz, com bibliotecas em [`crates/`](../crates/).
-> A implementação anterior foi preservada em [`legacy/`](../legacy/) e não participa do workspace Cargo.
-> Consulte também a [arquitetura atual](architecture.md) e o [ADR de layout](decisions/ADR-0002-repository-layout.md).
 
 ---
 

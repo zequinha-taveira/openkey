@@ -1,4 +1,4 @@
-# Ferramentas auxiliares (`tools/`)
+# Ferramentas Auxiliares (`tools/`)
 
 Ferramentas internas de desenvolvimento, automação e geração para o projeto OpenKey.
 
@@ -6,13 +6,14 @@ Ferramentas internas de desenvolvimento, automação e geração para o projeto 
 
 ```text
 tools/
-├── openkey-cli/      # CLI Rust do workspace ativo
-├── manufacturing/    # Ferramentas de produção e injeção de chaves
-├── migration/        # Scripts de migração de dados e perfis antigos
-├── scripts/          # Automação: build, lint e release
-└── generators/       # Geradores de perfis de placas e documentação
+├── manufacturing/   # Ferramentas de produção e injeção de chaves de fábrica
+├── migration/       # Scripts de migração de dados e perfis de versões antigas
+├── scripts/         # Scripts de automação: build, lint, release, Docker
+└── generators/      # Geradores de código: Board Profiles, documentação, certificados
+
+> O simulador agora vive em `simulator/` (raiz do monorepo) — ver ADR-0010.
 ```
 
-O simulador e o firmware da implementação anterior foram preservados em `legacy/`. Um
-simulador host será adicionado ao workspace ativo quando sua fronteira de transporte estiver
-definida e coberta por testes.
+## Uso
+
+Cada subdiretório possui seu próprio `README.md` com instruções de uso.
