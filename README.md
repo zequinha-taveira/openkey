@@ -10,17 +10,19 @@ OpenKey é um **framework open-source universal** para chaves de segurança FIDO
 
 ```text
 openkey/
-├── firmware/              # Todo o código embarcado (no_std)
-│   ├── core/              # Núcleo de segurança e protocolo CTAP2
-│   ├── platform/          # HAL traits, Board/Device Profiles, Configuration Manager
-│   │   └── mcu/           # Implementações de MCU (rp23xx, esp32s3, stm32, nrf54)
-│   ├── protocols/         # Protocolos CTAP2, CBOR, HID, WebAuthn
+├── protocol/              # Domínio e protocolos independentes de MCU
+│   ├── core/              # Núcleo de segurança e contratos
+│   └── protocols/         # CTAP2, CBOR, HID, COSE e WebAuthn
+├── firmware/              # Serviços embarcados (no_std)
+│   ├── platform/          # HAL e serviços de plataforma
+│   │   └── mcu/rp23xx/    # Target de referência RP2350
 │   ├── storage/           # Gerenciamento de armazenamento persistente e wear-leveling
 │   ├── crypto/            # Abstrações criptográficas: ECC, SHA, AES, RNG
 │   ├── usb/               # Camada de transporte USB HID
 │   ├── config/            # Gerenciamento de configuração do firmware
 │   └── boot/              # Bootloader e inicialização segura
 │
+├── simulator/             # Target nativo para desenvolvimento e CI
 ├── boards/                # Perfis de hardware (apenas YAML — sem código Rust)
 │   ├── profiles/          # Perfis por família de MCU (rp23xx, esp32s3, stm32, nrf)
 │   ├── templates/         # Templates de perfil para novos boards
@@ -37,9 +39,8 @@ openkey/
 ├── tools/                 # Ferramentas internas
 │   ├── manufacturing/     # Gravação via SWD/JTAG, injeção de chaves de fábrica
 │   ├── migration/         # Scripts de migração de dados entre versões
-│   ├── scripts/           # Automação: build, lint, release, Docker
 │   ├── generators/        # Geradores de Board Profiles, docs, certificados
-│   └── simulator/         # Simulador de software da chave FIDO2
+│   └── scripts/            # Automação especializada
 │
 ├── tests/                 # Testes separados por objetivo
 │   ├── unit/              # Testes unitários por crate
@@ -61,6 +62,7 @@ openkey/
 ## 📄 Documentos Fundamentais
 
 - 🌐 [Ecosystem.md](Ecosystem.md) — Visão geral e arquitetura do OpenKey Ecosystem.
+- 🧭 [Organização prática](docs/development/repository-organization.md) — Inventário real, regras de layout e gate de build.
 - 🎯 [Product.md](Product.md) — Visão do produto, objetivos estratégicos e diferenciais.
 - 🚀 [Development Plan.md](Development%20Plan.md) — Plano de desenvolvimento incremental em 12 fases.
 - 📋 [spec.md](spec.md) — Especificação técnica funcional e não-funcional.

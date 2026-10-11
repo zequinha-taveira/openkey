@@ -139,6 +139,7 @@ Documentação técnica precisa. Descreve APIs, estruturas, protocolos e compone
 
 ### Desenvolvimento
 - [Git Branch Strategy](development/git-branch-strategy.md)
+- [Organização prática do repositório](development/repository-organization.md)
 
 ---
 
