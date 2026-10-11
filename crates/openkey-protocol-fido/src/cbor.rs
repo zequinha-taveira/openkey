@@ -1,5 +1,7 @@
 use core::str;
 
+pub mod value;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CborError {
     Empty,
@@ -8,6 +10,10 @@ pub enum CborError {
     NonCanonical,
     InvalidUtf8,
     OutputTooSmall,
+    TrailingData,
+    UnsupportedValue,
+    DepthExceeded,
+    TooManyItems,
 }
 
 fn encode_head(major: u8, value: u64, output: &mut [u8]) -> Result<usize, CborError> {
