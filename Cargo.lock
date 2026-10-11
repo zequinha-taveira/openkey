@@ -5,6 +5,9 @@ version = 4
 [[package]]
 name = "openkey-cli"
 version = "0.1.0"
+dependencies = [
+ "openkey-host",
+]
 
 [[package]]
 name = "openkey-core"
@@ -12,6 +15,10 @@ version = "0.1.0"
 
 [[package]]
 name = "openkey-crypto"
+version = "0.1.0"
+
+[[package]]
+name = "openkey-host"
 version = "0.1.0"
 
 [[package]]
