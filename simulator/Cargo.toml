@@ -1,0 +1,9 @@
+[package]
+name = "openkey-simulator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+openkey-usb = { path = "../crates/openkey-usb" }
+openkey-core = { path = "../crates/openkey-core" }

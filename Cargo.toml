@@ -8,6 +8,7 @@ members = [
     "crates/openkey-protocol-apdu",
     "crates/openkey-usb",
     "crates/openkey-update",
+    "simulator",
     "tools/openkey-cli",
 ]
 
