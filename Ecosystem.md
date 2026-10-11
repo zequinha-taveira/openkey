@@ -6,6 +6,12 @@
 
 ---
 
+> **Arquitetura canônica:** consulte [`docs/reference/ecosystem-architecture.md`](docs/reference/ecosystem-architecture.md)
+> para o mapa atualizado dos componentes e suas dependências. Este documento descreve a visão do
+> ecossistema; a implementação deve permanecer no layout existente (`protocol/`, `firmware/`,
+> `simulator/`, `host/`, `boards/`, `tests/` e `tools/`). A evolução é incremental: não se cria uma
+> segunda árvore de código nem se move código funcional para um diretório genérico como `legacy/`.
+
 ## 🎯 Visão
 
 O **OpenKey Ecosystem** é um conjunto integrado de projetos open source para desenvolvimento, teste, implantação e gerenciamento de autenticadores de hardware e chaves de segurança baseados em padrões abertos (**FIDO2 / CTAP2.1** e **W3C WebAuthn**).
@@ -54,7 +60,7 @@ O objetivo principal é fornecer uma plataforma completa e unificada para fabric
 
 ## 🧩 Componentes do Ecossistema
 
-### 1. OpenKey Core (`core/`)
+### 1. OpenKey Core (`protocol/core/` e `protocol/protocols/`)
 Framework universal e agnóstico para autenticadores de hardware desenvolvido em Rust `no_std`.
 
 **Responsável por:**
@@ -70,7 +76,7 @@ Framework universal e agnóstico para autenticadores de hardware desenvolvido em
 
 ---
 
-### 2. OpenKey SDK (`host/sdk`)
+### 2. OpenKey SDK (`host/sdk-python/`)
 Biblioteca oficial para comunicação, automação e integração com dispositivos OpenKey e o Simulador de Software.
 
 **Responsabilidades:**
@@ -112,7 +118,7 @@ Aplicação gráfica desktop multiplataforma (Windows, macOS, Linux).
 
 ---
 
-### 5. OpenKey Simulator (`host/simulator` / `targets/simulator`)
+### 5. OpenKey Simulator (`simulator/`)
 Implementação virtual do firmware executável nativamente em ambiente Desktop.
 
 **Objetivos:**
@@ -124,7 +130,7 @@ Implementação virtual do firmware executável nativamente em ambiente Desktop.
 
 ---
 
-### 6. OpenKey Test Framework (`fuzz/` & `host/tests`)
+### 6. OpenKey Test Framework (`tests/` e `fuzz/`)
 Infraestrutura completa de testes integrados:
 - **Testes de Protocolo**: Validação de conformidade com as especificações CTAP2.0/CTAP2.1.
 - **Testes de Interoperabilidade**: Suíte de testes com `libfido2`, `python-fido2` e navegadores.
@@ -138,12 +144,12 @@ Infraestrutura completa de testes integrados:
 O centro unificado de documentação oficial do projeto.
 
 **Inclui:**
-- **Arquitetura (`docs/architecture/`)**: Visão em camadas, responsabilidade dos módulos e fluxos de dados.
+- **Arquitetura (`docs/reference/ecosystem-architecture.md`)**: Visão em camadas, responsabilidade dos módulos e fluxos de dados.
 - **Segurança (`docs/security/`)**: Modelo de ameaças (STRIDE), Princípios de Engenharia Segura e política `unsafe`.
 - **Especificações (`spec.md`)**: Requisitos funcionais (RF) e não-funcionais (RNF).
-- **APIs (`docs/api/`)**: Documentação de referência para firmware, SDKs e ferramentas CLI/GUI.
-- **Setup & Plataformas (`docs/setup/`)**: Guias de instalação para Linux, Windows, macOS, Android e iOS.
-- **Decisões Arquiteturais (`docs/adr/`)**: Registros permanentes de decisões de engenharia (ADRs).
+- **APIs (`docs/reference/`)**: Documentação de referência para firmware, SDKs e ferramentas CLI/GUI.
+- **Setup & Plataformas (`docs/tutorials/` e `docs/how-to/`)**: Guias de instalação e operação.
+- **Decisões Arquiteturais (`docs/development/`)**: Registros permanentes de decisões de engenharia (ADRs).
 
 ---
 
@@ -170,24 +176,25 @@ O centro unificado de documentação oficial do projeto.
 
 ```text
 openkey/
-├── core/                      # Núcleo de segurança (Security Core)
-├── platform/                  # HAL traits, Board/Device Profiles, Configuration Manager
-├── protocols/                 # Protocolos CTAP2, CBOR, HID, WebAuthn
-├── storage/                   # Gerenciamento de armazenamento persistente e wear-leveling
-├── crypto/                    # Abstrações criptográficas
-├── boards/                    # Implementações de board (RP2350, STM32, nRF, ESP32)
-├── host/                      # Ecossistema host (sdk, cli, gui, simulator)
-│   ├── sdk/                   # OpenKey Python SDK & Bindings
-│   ├── cli/                   # Interface de Linha de Comando (openkey-cli)
-│   ├── gui/                   # Aplicação Desktop Graphic Manager
-│   └── simulator/             # Alvo do Simulador de Software
-├── tools/                     # Scripts de diagnóstico e ferramentas de desenvolvimento
-├── docs/                      # Centro unificado de documentação técnica
-├── examples/                  # Exemplos de uso do SDK e integrações
-├── hardware/                  # Esquemáticos e layouts de PCB open hardware
-├── fuzz/                      # Harnesses de fuzzing para cargo-fuzz
-├── scripts/                   # Scripts de automação de CI/CD e release
-└── .github/                   # Workflows de Integração Contínua (GitHub Actions)
+├── protocol/                  # Contratos e protocolos independentes de MCU
+│   ├── core/                  # Núcleo de domínio e erros
+│   └── protocols/             # CBOR, COSE, CTAP2, CTAP-HID e WebAuthn
+├── firmware/                  # Serviços embarcados e targets
+│   ├── platform/              # HAL e serviços de plataforma
+│   │   └── mcu/rp23xx/        # Target de referência RP2350
+│   ├── crypto/                # Integração criptográfica
+│   ├── storage/               # Persistência e wear-leveling
+│   ├── usb/                   # Transporte USB/HID
+│   ├── config/                # Configuração e políticas
+│   └── boot/                  # Boot e atualização segura
+├── simulator/                 # Target nativo para desenvolvimento e CI
+├── boards/                    # Perfis declarativos de placas
+├── host/                      # SDK, CLI, GUI e ferramentas de operação
+├── tests/                     # Testes por objetivo e ambiente
+├── fuzz/                      # Harnesses de fuzzing
+├── tools/                     # Scripts e geradores
+├── docs/                      # Documentação técnica
+└── .github/                   # Workflows de integração contínua
 ```
 
 ---
@@ -225,9 +232,9 @@ Cada componente do ecossistema OpenKey é desenhado para ser **independente, bem
 
 Todo o ecossistema compartilha obrigatoriamente:
 - Especificações técnicas normativas ([`spec.md`](spec.md)).
-- Princípios arquiteturais ([`docs/architecture/architecture.md`](docs/architecture/architecture.md)).
-- Princípios de segurança e políticas de código ([`docs/security/security-principles.md`](docs/security/security-principles.md)).
-- APIs públicas e convenções de versionamento semântico ([`docs/adr/ADR-0009-versioning.md`](docs/adr/ADR-0009-versioning.md)).
+- Arquitetura e contratos ([`docs/reference/ecosystem-architecture.md`](docs/reference/ecosystem-architecture.md)).
+- Princípios de segurança ([`docs/explanation/security-principles.md`](docs/explanation/security-principles.md)) e política de `unsafe` ([`docs/security/unsafe-policy.md`](docs/security/unsafe-policy.md)).
+- Decisões e convenções de engenharia ([`docs/explanation/architecture-decisions.md`](docs/explanation/architecture-decisions.md)).
 - Infraestrutura de testes automatizados e integração contínua.
 
 ---

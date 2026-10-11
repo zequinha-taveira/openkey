@@ -32,7 +32,7 @@ docs/
 │   └── release.md
 │
 ├── reference/                # Referência técnica
-│   ├── architecture/
+│   ├── ecosystem-architecture.md
 │   ├── protocols/
 │   ├── crypto/
 │   ├── host/
@@ -93,6 +93,7 @@ Mostram como executar uma tarefa específica. Pressupõem conhecimento básico.
 Documentação técnica precisa. Descreve APIs, estruturas, protocolos e componentes.
 
 ### Arquitetura
+- [OpenKey Ecosystem](reference/ecosystem-architecture.md)
 - [Architecture](reference/architecture/architecture.md)
 - [Firmware](reference/architecture/firmware.md)
 - [Platform](reference/architecture/platform.md)
