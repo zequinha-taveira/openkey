@@ -7,3 +7,6 @@ license.workspace = true
 [[bin]]
 name = "openkey-cli"
 path = "src/main.rs"
+
+[dependencies]
+openkey-host = { path = "../../crates/openkey-host" }
