@@ -1,12 +1,9 @@
 # Documentação do OpenKey 📖
 
 Bem-vindo ao centro de documentação oficial do monorepo **OpenKey** (Versão Estável `v1.0.0`).
+
 A documentação segue o modelo [Diátaxis](https://diataxis.fr/):
 **Tutorials** → **How-to** → **Reference** → **Explanation**.
-
-> **Layout atual:** o workspace Rust ativo está na raiz, com bibliotecas em [`crates/`](../crates/).
-> A implementação anterior foi preservada em [`legacy/`](../legacy/) e não participa do workspace Cargo.
-> Consulte também a [arquitetura atual](architecture.md) e o [ADR de layout](decisions/ADR-0002-repository-layout.md).
 
 ---
 
@@ -35,7 +32,7 @@ docs/
 │   └── release.md
 │
 ├── reference/                # Referência técnica
-│   ├── architecture/
+│   ├── ecosystem-architecture.md
 │   ├── protocols/
 │   ├── crypto/
 │   ├── host/
@@ -96,6 +93,7 @@ Mostram como executar uma tarefa específica. Pressupõem conhecimento básico.
 Documentação técnica precisa. Descreve APIs, estruturas, protocolos e componentes.
 
 ### Arquitetura
+- [OpenKey Ecosystem](reference/ecosystem-architecture.md)
 - [Architecture](reference/architecture/architecture.md)
 - [Firmware](reference/architecture/firmware.md)
 - [Platform](reference/architecture/platform.md)
@@ -141,6 +139,7 @@ Documentação técnica precisa. Descreve APIs, estruturas, protocolos e compone
 
 ### Desenvolvimento
 - [Git Branch Strategy](development/git-branch-strategy.md)
+- [Organização prática do repositório](development/repository-organization.md)
 
 ---
 

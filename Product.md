@@ -72,11 +72,11 @@ Consulte a especificação detalhada do ecossistema em [`Ecosystem.md`](Ecosyste
 +------------------+         +-------------------+         +-------------------+
 ```
 
-1. **OpenKey Core Framework (`core/`)**: O núcleo de segurança em Rust `no_std`, cobrindo parsers CBOR canônicos, máquina de estados CTAP2.1, gerenciador de credenciais, política de PIN e abstrações de criptografia.
-2. **Platform (`platform/`)**: HAL traits, Board Profile, Device Profile, Configuration Manager e Platform Services.
-3. **Reference Target RP2350 (`boards/rp2350/`)**: Firmware de referência utilizando o Raspberry Pi Pico SDK / Rust HAL.
-4. **Software Simulator (`host/simulator/`)**: Alvo executável em ambiente desktop (Linux/macOS/Windows) simulando pacotes USB HID e armazenamento.
-5. **OpenKey Host SDK (`host/sdk/`)**: SDK Python/Rust para integração, automação, diagnósticos e gerenciamento.
+1. **OpenKey Core Framework (`protocol/core/` e `protocol/protocols/`)**: O núcleo de segurança e os protocolos em Rust `no_std`, cobrindo parsers CBOR canônicos, CTAP2, WebAuthn, política de PIN e contratos de criptografia.
+2. **Platform (`firmware/platform/`)**: HAL traits, Board Profile, Device Profile, Configuration Manager e Platform Services.
+3. **Reference Target RP2350 (`firmware/platform/mcu/rp23xx/`)**: Firmware de referência utilizando o HAL do target RP23xx.
+4. **Software Simulator (`simulator/`)**: Alvo executável em ambiente desktop (Linux/macOS/Windows) simulando transporte, armazenamento e serviços de plataforma.
+5. **OpenKey Host SDK (`host/sdk-python/`)**: SDK Python para integração, automação, diagnósticos e gerenciamento.
 6. **OpenKey CLI (`host/cli/`)**: Ferramenta de linha de comando oficial `openkey-cli`.
 7. **OpenKey Manager (`host/gui/`)**: Aplicação desktop gráfica para gerenciamento intuitivo de credenciais e configurações da chave.
 

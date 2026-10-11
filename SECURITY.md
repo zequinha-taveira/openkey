@@ -23,7 +23,7 @@ Se você descobriu uma falha de segurança no firmware do OpenKey, SDKs, parsers
 ### Informações Recomendadas no Relatório
 
 - Tipo de vulnerabilidade (ex: estouro de buffer, falha de canal lateral, bypass de validação de PIN, vazamento de credencial).
-- Componente afetado (`firmware/`, `host/sdk`, `fuzz/`, `host/simulator`).
+- Componente afetado (`firmware/`, `host/sdk-python/`, `fuzz/`, `simulator/`).
 - Passos detalhados para reprodução ou Proof-of-Concept (PoC).
 - Impacto potencial de exploração (local, USB HID físico, ataque de proximidade NFC).
 
