@@ -1,4 +1,4 @@
-# OpenKey — Visão e Objetivos do Produto (`Product.md`)
+# OpenKey — Visão e Objetivos do Produto (`product-overview.md`)
 
 **Versão:** 1.0  
 **Status:** Aprovado  
@@ -56,7 +56,7 @@ O projeto OpenKey expressamente **não** pretende:
 
 ## 🧩 5. Componentes do Ecossistema OpenKey
 
-Consulte a especificação detalhada do ecossistema em [`Ecosystem.md`](Ecosystem.md).
+Consulte a especificação detalhada do ecossistema em [`../reference/ecosystem.md`](../reference/ecosystem.md).
 
 ```
                                OpenKey Ecosystem

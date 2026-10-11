@@ -1,4 +1,4 @@
-# OpenKey Ecosystem (`Ecosystem.md`)
+# OpenKey Ecosystem (`ecosystem.md`)
 
 **Versão:** 1.0  
 **Status:** Rascunho / Aprovado (Draft / Approved)  
@@ -6,7 +6,7 @@
 
 ---
 
-> **Arquitetura canônica:** consulte [`docs/reference/ecosystem-architecture.md`](docs/reference/ecosystem-architecture.md)
+> **Arquitetura canônica:** consulte [`ecosystem-architecture.md`](ecosystem-architecture.md)
 > para o mapa atualizado dos componentes e suas dependências. Este documento descreve a visão do
 > ecossistema; a implementação deve permanecer no layout existente (`protocol/`, `firmware/`,
 > `simulator/`, `host/`, `boards/`, `tests/` e `tools/`). A evolução é incremental: não se cria uma
@@ -232,9 +232,9 @@ Cada componente do ecossistema OpenKey é desenhado para ser **independente, bem
 
 Todo o ecossistema compartilha obrigatoriamente:
 - Especificações técnicas normativas ([`spec.md`](spec.md)).
-- Arquitetura e contratos ([`docs/reference/ecosystem-architecture.md`](docs/reference/ecosystem-architecture.md)).
-- Princípios de segurança ([`docs/explanation/security-principles.md`](docs/explanation/security-principles.md)) e política de `unsafe` ([`docs/security/unsafe-policy.md`](docs/security/unsafe-policy.md)).
-- Decisões e convenções de engenharia ([`docs/explanation/architecture-decisions.md`](docs/explanation/architecture-decisions.md)).
+- Arquitetura e contratos ([`ecosystem-architecture.md`](ecosystem-architecture.md)).
+- Princípios de segurança ([`../explanation/security-principles.md`](../explanation/security-principles.md)) e política de `unsafe` ([`../security/unsafe-policy.md`](../security/unsafe-policy.md)).
+- Decisões e convenções de engenharia ([`../explanation/architecture-decisions.md`](../explanation/architecture-decisions.md)).
 - Infraestrutura de testes automatizados e integração contínua.
 
 ---

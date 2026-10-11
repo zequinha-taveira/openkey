@@ -29,4 +29,4 @@ Cada fase adiciona funcionalidade enquanto mantém a estabilidade das fases ante
 
 - [Visão do Produto](product.md)
 - [Roadmap](roadmap.md)
-- Documento raiz: [`Development Plan.md`](../../Development%20Plan.md)
+- Documento raiz: [`../planning/development-plan.md`](../../docs/planning/development-plan.md)

@@ -17,9 +17,9 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - `CHANGELOG.md/`
 - `CODE_OF_CONDUCT.md/`
 - `CONTRIBUTING.md/`
-- `Development Plan.md/`
+- `../../docs/planning/development-plan.md/`
 - `docs/` — Living documentation produced by this tool.
-- `Ecosystem.md/`
+- `../../docs/reference/ecosystem.md/`
 - `examples/`
 - `core/`
 - `platform/`
@@ -34,12 +34,12 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - `hardware/`
 - `host/`
 - `LICENSE/`
-- `Product.md/`
+- `../../docs/explanation/product-overview.md/`
 - `README.md/`
 - `RELEASING.md/`
 - `scripts/`
 - `SECURITY.md/`
-- `spec.md/`
+- `../../docs/reference/docs/reference/spec.md/`
 - `SUPPORT.md/`
 - `third_party/`
 - `tools/`

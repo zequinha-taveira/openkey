@@ -32,7 +32,10 @@ docs/
 │   └── release.md
 │
 ├── reference/                # Referência técnica
+│   ├── ecosystem.md
 │   ├── ecosystem-architecture.md
+│   ├── spec.md
+│   ├── version-history.md
 │   ├── protocols/
 │   ├── crypto/
 │   ├── host/
@@ -41,8 +44,8 @@ docs/
 │   └── adr/
 │
 ├── explanation/              # Conceitos
+│   ├── product-overview.md
 │   ├── product.md
-│   ├── development-plan.md
 │   ├── threat-model.md
 │   ├── security-principles.md
 │   ├── universal-firmware.md
@@ -50,6 +53,11 @@ docs/
 │   ├── commissioning.md
 │   ├── architecture-decisions.md
 │   └── roadmap.md
+│
+├── planning/                 # Planejamento operacional
+│   ├── development-plan.md
+│   ├── phases.md
+│   └── tasks.md
 │
 └── diagrams/
     ├── architecture.drawio
@@ -140,6 +148,11 @@ Documentação técnica precisa. Descreve APIs, estruturas, protocolos e compone
 ### Desenvolvimento
 - [Git Branch Strategy](development/git-branch-strategy.md)
 - [Organização prática do repositório](development/repository-organization.md)
+
+### Planejamento
+- [Plano de desenvolvimento](planning/development-plan.md)
+- [Fases](planning/phases.md)
+- [Tarefas](planning/tasks.md)
 
 ---
 

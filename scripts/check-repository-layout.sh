@@ -47,9 +47,9 @@ done
 cargo metadata --no-deps --format-version 1 >/dev/null
 
 # Guard against the most common stale path names in active top-level project docs.
-if rg -n --glob '*.md' --glob '!docs/reference/adr/**' \
+if rg -n --glob '*.md' --glob '!docs/reference/adr/**' --glob '!docs/reference/version-history.md' \
   'firmware/protocols/|host/simulator|host/sdk/' \
-  README.md Product.md Ecosystem.md SECURITY.md docs/reference/ecosystem-architecture.md >/dev/null; then
+  README.md SECURITY.md docs/reference docs/explanation docs/planning >/dev/null; then
   echo "layout error: stale canonical path found in active documentation" >&2
   exit 1
 fi

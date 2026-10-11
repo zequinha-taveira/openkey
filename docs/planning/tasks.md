@@ -25,7 +25,7 @@
 
 ## 🖥️ Fase 10 — Desktop GUI (OpenKey Manager)
 
-Fase do `Development Plan.md` que implementa o **OpenKey Manager**, aplicação
+Fase do `development-plan.md` que implementa o **OpenKey Manager**, aplicação
 desktop gráfica multiplataforma (Windows, macOS, Linux). Framework: **PySide6**
 (ADR-0013). Estrutura: `host/gui/` com camada `core/` (sem Qt, testável
 headless) + `ui/` (PySide6). Depende de gaps do `host/sdk-python`.
@@ -200,9 +200,9 @@ headless) + `ui/` (PySide6). Depende de gaps do `host/sdk-python`.
 ## 🔧 PAR-08 — Release (Concluída)
 
 - [x] **REL-001**: Preparar CHANGELOG (`CHANGELOG.md` atualizado com versão `1.0.0`)
-- [x] **REL-002**: Preparar Release Notes (`VERSION_HISTORY.md` e notas de lançamento v1.0.0)
+- [x] **REL-002**: Preparar Release Notes (`../reference/version-history.md` e notas de lançamento v1.0.0)
 - [x] **REL-003**: Criar pacotes de distribuição (Cargo release, firmware binário RP2350, Python SDK)
-- [x] **REL-004**: Finalizar documentação (Sincronização 100% dos documentos `spec.md`, `README.md`, `PHASES.md`, `TASKS.md`)
+- [x] **REL-004**: Finalizar documentação (Sincronização 100% dos documentos `../reference/spec.md`, `README.md`, `phases.md`, `tasks.md`)
 - [x] **REL-005**: Criar tag de versão (Tag Git `v1.0.0` gerada)
 
 ---

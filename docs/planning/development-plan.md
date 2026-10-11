@@ -1,4 +1,4 @@
-# Plano de Desenvolvimento — OpenKey (`Development Plan.md`)
+# Plano de Desenvolvimento — OpenKey (`development-plan.md`)
 
 **Versão:** 1.0  
 **Status:** Aprovado  
@@ -22,7 +22,7 @@ O desenvolvimento do **OpenKey Framework** segue uma abordagem estritamente incr
 ### Fase 1: Infraestrutura do Framework e Monorepo
 - **Escopo**:
   - Estruturação do monorepo, governança e pipeline de compilação em Rust (`Cargo.toml` workspace).
-  - Estruturação do `openkey-core` (`no_std`), `openkey-platform` (traits), `boards/rp2350` e `host/simulator`.
+  - Estruturação do `openkey-core` (`no_std`), `openkey-platform` (traits), `boards/rp2350` e `simulator/`.
   - Configuração do pipeline de Integração Contínua (GitHub Actions) com linters e checadores estáticos.
 - **Entrega**: O projeto compila com sucesso para os alvos `simulator` e `rp2350`.
 

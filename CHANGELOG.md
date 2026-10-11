@@ -10,8 +10,8 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [1.0.0] - 2026-07-31
 
 ### Adicionado
-- **PAR-01 Foundation (`v0.1.0`)**: Estrutura completa do monorepo, governança (`AGENTS.md`, `TASKS.md`, `PHASES.md`), CI/CD automatizado no GitHub Actions.
-- **PAR-02 Architecture (`v0.2.0`)**: Especificação técnica `spec.md` (15 Requisitos Funcionais + 10 Requisitos Não-Funcionais), 12 ADRs aceitas e imutáveis, Threat Model e Security Principles.
+- **PAR-01 Foundation (`v0.1.0`)**: Estrutura completa do monorepo, governança (`AGENTS.md`, `docs/planning/tasks.md`, `docs/planning/phases.md`), CI/CD automatizado no GitHub Actions.
+- **PAR-02 Architecture (`v0.2.0`)**: Especificação técnica `docs/reference/spec.md` (15 Requisitos Funcionais + 10 Requisitos Não-Funcionais), 12 ADRs aceitas e imutáveis, Threat Model e Security Principles.
 - **PAR-03 Platform (`v0.3.0` / `v0.3.1`)**: Platform Abstraction Layer (PAL) com 10 HAL traits, Board & Device Profiles, e Config Manager A/B dual-slot com criptografia AES-256-GCM (ADR-0011, ADR-0012).
 - **PAR-04 Security (`v0.4.0`)**: Secure Boot API com verificação ECDSA P-256 e bootloader dual-bank com rollback, Secure Storage com wear-leveling circular e detecção de corte de energia (`Writing` state recovery), Key Management com zeroização automática via `Drop`, interface OTP/efuses, Device Identity (AAGUID) e validação de TRNG contínua NIST SP 800-90B (Monobit, Poker, Runs, CRNGT). Codebase 100% Safe Rust auditado por Miri.
 - **PAR-05 Protocols (`v0.5.0`)**: Pilha de protocolos no crate `openkey-protocols`:
