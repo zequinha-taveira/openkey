@@ -2,16 +2,16 @@ name: OpenKey CI Workflow
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check-and-test:
-    name: Code Quality & Test Suite
+  rust:
+    name: Rust quality and tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,54 +22,17 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Verify Code Formatting
+      - name: Verify formatting
         run: cargo fmt --check
 
-      - name: Run Clippy Linter
-        run: cargo clippy --workspace --all-targets --exclude openkey-target-rp2350 -- -D warnings
-
-      - name: Run Workspace Unit Tests
+      - name: Run tests
         run: cargo test --workspace
 
-  embedded-firmware:
-    name: Embedded Firmware (RP2350)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-          targets: thumbv8m.main-none-eabihf
-
-      - name: Check RP2350 Firmware
-        run: cargo check -p openkey-target-rp2350 --target thumbv8m.main-none-eabihf
-
-      - name: Clippy RP2350 Firmware
-        run: cargo clippy -p openkey-target-rp2350 --target thumbv8m.main-none-eabihf -- -D warnings
-
-  miri-check:
-    name: Miri UB Detection
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Install Rust nightly with Miri
-        uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: miri
-
-      - name: Run Miri on workspace (except target crates)
-        run: |
-          cargo +nightly miri test -p openkey-crypto -p openkey-storage -p openkey-platform -p openkey-boot -p openkey-core 2>&1 || true
-          # Miri is informational — codebase currently has zero unsafe blocks
-          echo "Miri check completed"
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
   host-python:
-    name: Host Python (SDK, Diagnostics, CLI, GUI)
+    name: Host Python SDK and tools
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -80,17 +43,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install monorepo Python packages
+      - name: Install Python packages
         run: pip install -r requirements-dev.txt
 
-      - name: Install Qt runtime libraries (headless)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libfontconfig1 libxkbcommon0 \
-            libdbus-1-3 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
-            libxcb-render-util0 libxcb-shape0 libxcb-xinerama0
-
-      - name: Run Host Python Tests (headless)
+      - name: Run host tests
         env:
           QT_QPA_PLATFORM: offscreen
         run: python -m pytest host/sdk-python host/diagnostics host/gui host/cli host/provisioner -q

@@ -1,0 +1,8 @@
+[package]
+name = "openkey-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+openkey-core.workspace = true
