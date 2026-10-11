@@ -1,0 +1,10 @@
+schema: 1
+name: generic-test-board
+platform: simulated-rp2350-compatible
+transport: usb-hid-memory
+rng: controlled
+storage: memory-vault
+presence: virtual-gpio
+clock: deterministic
+boot: simulated-update
+hardware: none

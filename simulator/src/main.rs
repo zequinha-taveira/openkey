@@ -167,6 +167,83 @@ impl KeyStore for MemoryVault {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BoardError {
+    InvalidSignature,
+    Rollback,
+    Flash(SimulatorError),
+}
+
+/// Placa virtual para validar o contrato de um target RP2350 sem acessar hardware.
+/// O nome do perfil descreve a capacidade simulada, não uma dependência de MCU.
+pub struct GenericTestBoard {
+    pub usb_hid: MemoryTransport,
+    pub rng: ControlledRng,
+    pub flash: MemoryVault,
+    pub clock: DeterministicClock,
+    pub presence: UserPresence,
+    firmware_version: u32,
+    pending_version: Option<u32>,
+}
+
+impl GenericTestBoard {
+    pub const PROFILE: &'static str = "generic-rp2350-test";
+
+    pub fn new() -> Self {
+        Self {
+            usb_hid: MemoryTransport::default(),
+            rng: ControlledRng::new(&[0x42, 0x24]),
+            flash: MemoryVault::default(),
+            clock: DeterministicClock::default(),
+            presence: UserPresence::default(),
+            firmware_version: 0,
+            pending_version: None,
+        }
+    }
+
+    pub const fn firmware_version(&self) -> u32 {
+        self.firmware_version
+    }
+
+    pub fn stage_update(
+        &mut self,
+        manifest: openkey_update::UpdateManifest,
+        signature_valid: bool,
+    ) -> Result<(), BoardError> {
+        if !signature_valid {
+            return Err(BoardError::InvalidSignature);
+        }
+        if !manifest.is_newer_than(self.firmware_version) {
+            return Err(BoardError::Rollback);
+        }
+        self.flash
+            .write(b"pending-image", &manifest.image_len.to_be_bytes())
+            .map_err(BoardError::Flash)?;
+        self.pending_version = Some(manifest.version);
+        Ok(())
+    }
+
+    pub fn boot(&mut self) -> Result<(), BoardError> {
+        let mut image_length = [0; 4];
+        self.flash
+            .read(b"pending-image", &mut image_length)
+            .map_err(BoardError::Flash)?;
+        if u32::from_be_bytes(image_length) == 0 {
+            return Err(BoardError::Rollback);
+        }
+        self.firmware_version = self.pending_version.take().ok_or(BoardError::Rollback)?;
+        self.flash
+            .delete(b"pending-image")
+            .map_err(BoardError::Flash)
+    }
+}
+
+impl Default for GenericTestBoard {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn main() {
     let mut authenticator = Authenticator::new();
     authenticator
@@ -184,10 +261,11 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::{
-        ControlledRng, DeterministicClock, MemoryTransport, MemoryVault, SimulatorError,
-        UserPresence,
+        BoardError, ControlledRng, DeterministicClock, GenericTestBoard, MemoryTransport,
+        MemoryVault, SimulatorError, UserPresence,
     };
     use openkey_crypto::RngProvider;
+    use openkey_update::UpdateManifest;
     use openkey_usb::Transport;
     use openkey_vault::KeyStore;
 
@@ -256,5 +334,51 @@ mod tests {
         assert_eq!(&output, b"second");
         transport.timeout_next = true;
         assert_eq!(transport.receive(&mut output), Err(SimulatorError::Timeout));
+    }
+
+    #[test]
+    fn placa_generica_emula_perifericos_e_boot_update() {
+        let mut board = GenericTestBoard::new();
+        assert_eq!(GenericTestBoard::PROFILE, "generic-rp2350-test");
+        board.presence.set(true);
+        board.usb_hid.send(b"ctap").unwrap();
+        assert!(board.presence.is_present());
+        board
+            .stage_update(
+                UpdateManifest {
+                    version: 7,
+                    image_len: 128,
+                },
+                true,
+            )
+            .unwrap();
+        board.boot().unwrap();
+        assert_eq!(board.firmware_version(), 7);
+    }
+
+    #[test]
+    fn placa_generica_rejeita_assinatura_invalida_e_rollback() {
+        let mut board = GenericTestBoard::new();
+        assert_eq!(
+            board.stage_update(
+                UpdateManifest {
+                    version: 1,
+                    image_len: 64,
+                },
+                false,
+            ),
+            Err(BoardError::InvalidSignature)
+        );
+        board.firmware_version = 3;
+        assert_eq!(
+            board.stage_update(
+                UpdateManifest {
+                    version: 2,
+                    image_len: 64,
+                },
+                true,
+            ),
+            Err(BoardError::Rollback)
+        );
     }
 }
