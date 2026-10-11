@@ -6,3 +6,7 @@ license.workspace = true
 
 [lib]
 path = "src/lib.rs"
+
+[dependencies]
+p256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
+sha2 = { version = "0.10", default-features = false }
