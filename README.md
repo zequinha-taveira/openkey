@@ -7,17 +7,18 @@ OpenKey é um framework open-source universal para chaves de segurança FIDO2/We
 ```text
 openkey/
 ├── crates/                  # Núcleo Rust modular
-│   ├── openkey-core/        # Domínio e políticas
-│   ├── openkey-crypto/      # Interfaces criptográficas
-│   ├── openkey-vault/       # Ciclo de vida e armazenamento de chaves
-│   ├── openkey-protocol-fido/ # CTAP/FIDO
-│   ├── openkey-protocol-apdu/ # APDU
-│   ├── openkey-usb/         # Transporte USB
-│   └── openkey-update/      # Atualizações assinadas
+│   ├── openkey-core/        # Estado e políticas do autenticador
+│   ├── openkey-crypto/      # RNG e interfaces criptográficas
+│   ├── openkey-vault/       # Contrato de armazenamento de chaves
+│   ├── openkey-protocol-fido/ # Comandos CTAP2 e GetInfo
+│   ├── openkey-protocol-apdu/ # Parsing de cabeçalho APDU
+│   ├── openkey-usb/         # Transporte bidirecional
+│   └── openkey-update/      # Manifesto e anti-rollback inicial
+├── simulator/               # Transporte em memória e target nativo
 ├── boards/                  # Perfis de placas
 ├── tools/openkey-cli/       # CLI oficial
 ├── apps/desktop/            # Aplicação desktop futura
-├── tests/                   # Simulador, protocolo e interoperabilidade
+├── tests/                   # Contratos e interoperabilidade
 ├── docs/                    # Arquitetura, segurança e desenvolvimento
 └── .github/workflows/       # CI
 ```
@@ -25,20 +26,21 @@ openkey/
 ## Começar
 
 ```bash
-cargo fmt --check
+cargo fmt --all -- --check
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
+cargo run -p openkey-simulator
 cargo run -p openkey-cli -- info
 ```
 
-A implementação será incremental: primeiro contratos e testes, depois transportes, targets de hardware e integrações host.
+A implementação evolui de forma incremental: primeiro contratos e simulador, depois CBOR/CTAP completos, targets de hardware e integrações host.
 
 ## Princípios
 
 - separação entre domínio, protocolos, transporte e hardware;
 - Rust seguro por padrão e falha fechada;
 - nenhuma dependência de uma placa específica no núcleo;
-- testes de unidade, protocolo e interoperabilidade desde o início;
+- testes de unidade, contrato e interoperabilidade desde o início;
 - mudanças estruturais pequenas, revisáveis e documentadas.
 
 Consulte [`docs/architecture.md`](docs/architecture.md), [`docs/threat-model.md`](docs/threat-model.md) e [`docs/security-policy.md`](docs/security-policy.md).

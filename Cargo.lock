@@ -23,6 +23,14 @@ name = "openkey-protocol-fido"
 version = "0.1.0"
 
 [[package]]
+name = "openkey-simulator"
+version = "0.1.0"
+dependencies = [
+ "openkey-core",
+ "openkey-usb",
+]
+
+[[package]]
 name = "openkey-update"
 version = "0.1.0"
 
