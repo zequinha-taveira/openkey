@@ -2,33 +2,44 @@
 
 ## Pré-requisitos
 
-- Rust toolchain instalada
-- Cargo
+- Rust toolchain instalada (`rustup`, `cargo` e `rustc`)
+- Rust estável com `rustfmt` e `clippy`
 
 ## Passos
 
 1. **Clonar o repositório**
    ```bash
-   git clone https://github.com/openkey/openkey.git
+   git clone https://github.com/zequinha-taveira/openkey.git
    cd openkey
    ```
 
-2. **Build do workspace**
+2. **Verificar a formatação**
+   ```bash
+   cargo fmt --check
+   ```
+
+3. **Compilar o workspace ativo**
    ```bash
    cargo build --workspace
    ```
 
-3. **Build do simulador**
+4. **Executar a CLI de exemplo**
    ```bash
-   cargo build --package openkey-simulator
+   cargo run -p openkey-cli
    ```
 
-4. **Build do firmware RP2350**
+5. **Executar testes e lint**
    ```bash
-   cargo build --package openkey-target-rp2350
+   cargo test --workspace
+   cargo clippy --workspace --all-targets -- -D warnings
    ```
 
-## Erros Comuns
+O firmware específico de placas ainda será conectado por adaptadores em `boards/`. A
+implementação anterior de firmware, protocolos e simulador foi preservada em `legacy/` e
+não participa do workspace ativo.
 
-- **Toolchain não instalada**: `rustup install stable`
-- **Alvo não configurado**: `rustup target add thumbv6m-none-eabi`
+## Erros comuns
+
+- **Toolchain não instalada**: `rustup toolchain install stable`
+- **Componentes ausentes**: `rustup component add rustfmt clippy`
+- **Alvo embarcado ausente**: adicionar o target somente quando o adaptador da placa for definido
