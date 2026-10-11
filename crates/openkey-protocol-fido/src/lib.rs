@@ -3,6 +3,7 @@
 extern crate alloc;
 
 pub mod cbor;
+pub mod cose;
 
 /// Comandos CTAP2 suportados ou reservados pelo framework.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
