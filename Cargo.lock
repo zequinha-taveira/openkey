@@ -27,7 +27,10 @@ name = "openkey-simulator"
 version = "0.1.0"
 dependencies = [
  "openkey-core",
+ "openkey-crypto",
+ "openkey-update",
  "openkey-usb",
+ "openkey-vault",
 ]
 
 [[package]]
