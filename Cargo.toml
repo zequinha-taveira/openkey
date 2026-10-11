@@ -1,37 +1,23 @@
 [workspace]
 resolver = "2"
 members = [
-    "protocol/core",
-    "protocol/protocols",
-    "firmware/platform",
-    "firmware/storage",
-    "firmware/crypto",
-    "firmware/usb",
-    "firmware/config",
-    "firmware/boot",
-    "firmware/platform/mcu/rp23xx",
-    "simulator",
+    "crates/openkey-core",
+    "crates/openkey-crypto",
+    "crates/openkey-vault",
+    "crates/openkey-protocol-fido",
+    "crates/openkey-protocol-apdu",
+    "crates/openkey-usb",
+    "crates/openkey-update",
+    "tools/openkey-cli",
 ]
 
 [workspace.package]
-version = "1.0.0"
+version = "0.1.0"
 edition = "2021"
-authors = ["OpenKey Team"]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/openkey/openkey"
-
-[workspace.dependencies]
-openkey-core = { path = "protocol/core" }
-openkey-platform = { path = "firmware/platform" }
-openkey-protocols = { path = "protocol/protocols" }
-openkey-storage = { path = "firmware/storage" }
-openkey-crypto = { path = "firmware/crypto" }
-openkey-usb = { path = "firmware/usb" }
-openkey-config = { path = "firmware/config" }
-openkey-boot = { path = "firmware/boot" }
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/zequinha-taveira/openkey"
 
 [profile.release]
-panic = "abort"
-
-[profile.dev]
+codegen-units = 1
+lto = true
 panic = "abort"
